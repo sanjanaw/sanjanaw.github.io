@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+	<head>
+		<script src="d3.v3.min.js"></script>
+		<script src="/d3-geomap-1.0.1/js/d3.geomap.min.js"></script>
+		<script src="d3.geo.projection.min.js"></script>
+		<script src="topojson.v1.min.js"></script>
+		<script src="d3-queue.v2.min.js"></script>
+		<style>
+			body{
+				background-color:#0099ff;
+			}
+			.button{
+				background-color:#0099ff;
+				color: white;
+				border: 5px solid white;
+				border-radius: 8px;
+				padding: 10px 30px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 20px;
+				line-height: 150%;
+				margin: 5px;
+			}
+			.button:hover{
+				background-color:white;
+				color: #0099ff;
+				border: none;
+			}
+			#svg {
+				background-color:#0099ff;
+				width: 1800px;
+				height: 1000px;
+				float:left;
+				padding:5px; 
+			}
+			.q0-9 { fill:rgb(230, 255, 153); fill-opacity:1.0;}
+			.q1-9 { fill:rgb(196, 255, 77);  fill-opacity:1.0;}
+			.q2-9 { fill:rgb(172, 250, 0);  fill-opacity:1.0;}
+			.q3-9 { fill:rgb(100, 210, 0 );  fill-opacity:1.0;}
+			.q4-9 { fill:rgb(60, 180, 0);  fill-opacity:1.0;}
+			.q5-9 { fill:rgb(45, 150, 0);  fill-opacity:1.0;}
+			.q6-9 { fill:rgb(10, 100, 0);  fill-opacity:1.0;}
+			.q7-9 { fill:rgb(0, 60, 0);  fill-opacity:1.0;}
+			.q8-9 { fill:rgb(0, 30, 0);  fill-opacity:1.0;}
+			.hovered{
+				fill-opacity:1;
+				fill: #ff9900;
+				stroke: white;
+				stroke-width:2px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id = "buttons" style="width:100%;height: 40px; float:center;">
+		<center>
+			<button class="button" id="b2006">2006</button>
+			<button class="button" id="b2007">2007</button>
+			<button class="button" id="b2008">2008</button>
+			<button class="button" id="b2009">2009</button>
+			<button class="button" id="b2010">2010</button>
+			<button class="button" id="b2011">2011</button>
+		</center>
+		</div>
+		<div id="themap" style="width:85%;height: 1000px; float:left; min-width:1800px;"></div>
+		<div id="controls" style="width:12%;height: 500px; float:right;">
+		<br><br><br>
+		<br><br><br>
+		<br><br><br>
+			<input class="button" type="button" value="Hide CO2 Data!" id="co2"></input> 
+			<br><br><br>
+			<input class="button" type="button" value="Max CO2 Data!" id="mxco2data"></input> 
+			<input class="button" type="button" value="Min CO2 Data!" id="mnco2data"></input> 
+			<input class="button" type="button" value="Max Forest Data!" id="mxfordata"></input> 
+			<input class="button" type="button" value="Min Forest Data!" id="mnfordata"></input> 
+		</div>
+		<script>
+			var shData = 1, chYear = 1, maxco2 = 0, maxfor = 0, minco2 = 0, minfor = 0;
+			showMap(1);
+			b2006.onclick = function() {
+				showMap(1); chYear=1;
+			};
+			b2007.onclick = function() {
+				showMap(2); chYear=2;
+			};
+			b2008.onclick = function() {
+				showMap(3); chYear=3;
+			};
+			b2009.onclick = function() {
+				showMap(4); chYear=4;
+			};
+			b2010.onclick = function() {
+				showMap(5); chYear=5;
+			};
+			b2011.onclick = function() {
+				showMap(6); chYear=6;
+			};
+			co2.onclick = function(){
+			var elem = document.getElementById("co2");
+				if(shData==1){
+					shData = 0;
+					elem.value = "Show CO2 Data!";
+				}
+				else {
+					shData = 1;
+					elem.value = "Hide CO2 Data!";
+				}
+				showMap(chYear);
+			}
+			var svg = d3.select("body").select("#themap").append("svg").attr("id","svg");
+			function showMap(year){
+
+				var width = 1800,
+				height = 1000, centered;
+				var projection = d3.geo.naturalEarth().scale(300)
+									.translate([width / 2, height / 2]).precision(0.1);
+				var path = d3.geo.path().projection(projection);
+				var rateById1 = d3.map();
+				var rateById2 = d3.map();
+				d3_queue.queue()
+						.defer(d3.json, "/d3-geomap-1.0.1/topojson/world/countries.json")
+						.defer(d3.csv, "/ExtractedWorldData.csv", 
+						function(d) { 
+							if(year==1) {
+								rateById1.set(d.CountryCode, +d.CO2YR2006); 
+								rateById2.set(d.CountryCode, +d.FAYR2006); 
+								}
+							else if(year==2) {
+								rateById1.set(d.CountryCode, +d.CO2YR2007); 
+								rateById2.set(d.CountryCode, +d.FAYR2007); 
+								}
+							else if(year==3) {
+								rateById1.set(d.CountryCode, +d.CO2YR2008); 
+								rateById2.set(d.CountryCode, +d.FAYR2008); 
+								}
+							else if(year==4) {
+								rateById1.set(d.CountryCode, +d.CO2YR2009); 
+								rateById2.set(d.CountryCode, +d.FAYR2009); 
+								}
+							else if(year==5) {
+								rateById1.set(d.CountryCode, +d.CO2YR2010); 
+								rateById2.set(d.CountryCode, +d.FAYR2010); 
+								}
+							else if(year==6) {
+								rateById1.set(d.CountryCode, +d.CO2YR2011);
+								rateById2.set(d.CountryCode, +d.FAYR2011);
+								}								
+						})
+						.await(ready);
+				var quantize = d3.scale.pow().exponent(0.8)
+									.domain([0, 6000])
+									.range(d3.range(9).map(function(i){return i;}));
+				function radius(r){
+					if(typeof r == 'undefined') return 0;
+					return d3.round(r);
+				}
+				function ready(error, countries) {
+					if (error) throw error;
+					var datac = [], dataf = [];
+					svg.selectAll("g").remove();
+					svg.append("g").attr("fill","#696969").attr("fill-opacity", "0.7")
+								.attr("class", "units zoom")
+								.selectAll("path")
+								.data(topojson.feature(countries, countries.objects.units).features)
+								.enter().append("path").attr("id", function(d){ return d.id; })
+								.attr("class", function(d) { datac.push(d); return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; })
+								.attr("d", path).on("click",function(d) { clicked(d,"#"+d.id);}).on("mouseover", hovered).on("mouseout",nohovered);
+					svg.append("g")
+								.attr("class", "units zoom")
+								.selectAll("circle")
+								.data(topojson.feature(countries, countries.objects.units).features)
+								.enter().append("circle").attr("fill-opacity", ".4")
+								.attr("transform", function(d) {  dataf.push(d); return "translate(" + path.centroid(d) + ")"; })
+								.attr("r", function(d){ 
+													if(shData==1)
+														return radius(rateById1.get(d.id));
+													else
+														return 0;
+													})
+								.attr("fill","#990000").on("click",function(d) { clicked(d,"#"+d.id);});
+					for (var i in datac) { 
+						if(datac[i].id=="QAT") {
+							maxco2 = datac[i];
+						}
+						if(datac[i].id=="BDI") {
+							minco2 = datac[i];
+						}
+					}
+					for (var i in dataf) { 
+						if(dataf[i].id=="RUS") {
+							maxfor = dataf[i];
+						}
+						if(dataf[i].id=="QAT") {
+							minfor = dataf[i];
+						}
+					}
+					mxco2data.onclick = function() { 
+						clicked(maxco2,"#"+maxco2.id); 
+					}
+					mnco2data.onclick = function() { 
+						clicked(minco2,"#"+minco2.id); 
+					}
+					mxfordata.onclick = function() { 
+						clicked(maxfor,"#"+maxfor.id); 
+					}
+					mnfordata.onclick = function() { 
+						clicked(minfor,"#"+minfor.id); 
+					}
+				}
+
+				function hovered(d){
+					d3.select(this).attr("class", "hovered");
+					d3.select(this).append("svg:title")
+						.text(d.properties.name+"\nCO2 Emissions: "+rateById1.get(d.id)+" (metric tons per capita)"
+								+"\nForest Area: "+rateById2.get(d.id)+" (sq. km)").style("visibility", "visible") ;
+				}
+				function nohovered(d){
+					d3.select(this).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+				}
+				function clicked(d, code) {
+					var x, y, k;
+					if (d && centered !== d) {
+						var centroid = path.centroid(d);
+						x = centroid[0];
+						y = centroid[1];
+						k = 4;
+						centered = d;
+						transp = 0;
+						durat = 100;
+						console.log(code);
+						svg.select(code).attr("class", "hovered");
+					} else {
+						x = width / 2;
+						y = height / 2;
+						k = 1;
+						centered = null;
+						transp = 0.4;
+						durat = 1500;
+						svg.select(code).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+					}
+					svg.select("g").selectAll("path")
+						.classed("active", centered && function(d) { return d === centered; });
+					svg.select("g").transition()
+						.duration(750)
+						.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+						.style("stroke-width", 1.5 / k + "px");
+					svg.selectAll("circle").transition()
+						.duration(durat)
+						.attr("fill-opacity", transp);
+				}
+				d3.select(self.frameElement).style("height", height + "px");		
+
+			}
+		</script>
+	</body>
+</html>
