@@ -11,7 +11,8 @@
 			body{
 				background-color:#0099ff;
 			}
-			.button{
+			.button1{
+				font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
 				background-color:#0099ff;
 				color: white;
 				border: 5px solid white;
@@ -23,8 +24,29 @@
 				font-size: 20px;
 				line-height: 150%;
 				margin: 5px;
+				width: 125px;
 			}
-			.button:hover{
+			.button1:hover{
+				background-color:white;
+				color: #0099ff;
+				border: none;
+			}
+			.button2{
+				font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+				background-color:#0099ff;
+				color: white;
+				border: 5px solid white;
+				border-radius: 8px;
+				padding: 10px 10px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 20px;
+				line-height: 150%;
+				margin: 5px;
+				width: 200px;
+			}
+			.button2:hover{
 				background-color:white;
 				color: #0099ff;
 				border: none;
@@ -51,51 +73,69 @@
 				stroke: white;
 				stroke-width:2px;
 			}
+			.textdec{
+				font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+				background-color:#0099ff;
+				color: white;
+				padding: 10px 30px;
+				text-decoration: none;
+				font-size: 25px;
+				line-height: 150%;
+			}
 		</style>
 	</head>
 	<body>
-		<div id = "buttons" style="width:100%;height: 40px; float:center;">
+		<div id = "buttons" style="width:100%;height: 80px; float:center;">
 		<center>
-			<button class="button" id="b2006">2006</button>
-			<button class="button" id="b2007">2007</button>
-			<button class="button" id="b2008">2008</button>
-			<button class="button" id="b2009">2009</button>
-			<button class="button" id="b2010">2010</button>
-			<button class="button" id="b2011">2011</button>
+			<button class="button1" id="b2006">2006</button>
+			<button class="button1" id="b2007">2007</button>
+			<button class="button1" id="b2008">2008</button>
+			<button class="button1" id="b2009">2009</button>
+			<button class="button1" id="b2010">2010</button>
+			<button class="button1" id="b2011">2011</button>
 		</center>
 		</div>
 		<div id="themap" style="width:85%;height: 1000px; float:left; min-width:1500px;"></div>
 		<div id="controls" style="width:12%;height: 500px; float:right;">
 		<br><br><br>
 		<br><br><br>
-		<br><br><br>
-			<input class="button" type="button" value="Hide CO2 Data!" id="co2"></input> 
+			<input class="button2" type="button" value="Hide CO2 Data!" id="co2"></input> 
 			<br><br><br>
-			<input class="button" type="button" value="Max CO2 Data!" id="mxco2data"></input> 
-			<input class="button" type="button" value="Min CO2 Data!" id="mnco2data"></input> 
-			<input class="button" type="button" value="Max Forest Data!" id="mxfordata"></input> 
-			<input class="button" type="button" value="Min Forest Data!" id="mnfordata"></input> 
+			<input class="button2" type="button" value="Max CO2 Data!" id="mxco2data"></input> 
+			<input class="button2" type="button" value="Min CO2 Data!" id="mnco2data"></input> 
+			<input class="button2" type="button" value="Max Forest Data!" id="mxfordata"></input> 
+			<input class="button2" type="button" value="Min Forest Data!" id="mnfordata"></input> 
+		</div>
+		<div id="info" style="width:12%;height: 500px; float:right;">
+		<p id="infotext" class="textdec"></p>
 		</div>
 		<script>
 			var shData = 1, chYear = 1, maxco2 = 0, maxfor = 0, minco2 = 0, minfor = 0;
+			var maxco2on = 0, minco2on = 0, maxforon = 0, minforon = 0;
 			showMap(1);
 			b2006.onclick = function() {
 				showMap(1); chYear=1;
+				cleardata();
 			};
 			b2007.onclick = function() {
 				showMap(2); chYear=2;
+				cleardata();
 			};
 			b2008.onclick = function() {
 				showMap(3); chYear=3;
+				cleardata();
 			};
 			b2009.onclick = function() {
 				showMap(4); chYear=4;
+				cleardata();
 			};
 			b2010.onclick = function() {
 				showMap(5); chYear=5;
+				cleardata();
 			};
 			b2011.onclick = function() {
 				showMap(6); chYear=6;
+				cleardata();
 			};
 			co2.onclick = function(){
 			var elem = document.getElementById("co2");
@@ -107,7 +147,12 @@
 					shData = 1;
 					elem.value = "Hide CO2 Data!";
 				}
+				cleardata();
 				showMap(chYear);
+			}
+			function cleardata(){
+				maxco2 = 0; maxfor = 0; minco2 = 0; minfor = 0;
+				maxco2on = 0; minco2on = 0; maxforon = 0; minforon = 0;
 			}
 			var svg = d3.select("body").select("#themap").append("svg").attr("id","svg");
 			function showMap(year){
@@ -197,16 +242,56 @@
 						}
 					}
 					mxco2data.onclick = function() { 
+						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						clicked(maxco2,"#"+maxco2.id); 
+						document.getElementById('infotext').innerHTML = "";
+						if(maxco2on == 0){
+							document.getElementById('infotext').innerHTML = maxco2.properties.name + " has maximum CO2 emission of " + rateById1.get(maxco2.id) +
+							" metric tons per capita.";
+							maxco2on =1;
+						}
+						else maxco2on = 0;
 					}
 					mnco2data.onclick = function() { 
+						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						clicked(minco2,"#"+minco2.id); 
+						document.getElementById('infotext').innerHTML = "";
+						if(minco2on == 0){
+							document.getElementById('infotext').innerHTML = minco2.properties.name + " has minimum CO2 emission of " + rateById1.get(minco2.id) +
+							" metric tons per capita.";
+							minco2on =1;
+						}
+						else minco2on = 0;
 					}
 					mxfordata.onclick = function() { 
+						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						clicked(maxfor,"#"+maxfor.id); 
+						document.getElementById('infotext').innerHTML = "";
+						if(maxforon == 0){
+							document.getElementById('infotext').innerHTML = maxfor.properties.name + " has maximum forest area of " + rateById2.get(maxfor.id) +
+							" square kilometers.";
+							maxforon =1;
+						}
+						else maxforon = 0;
 					}
-					mnfordata.onclick = function() { 
+					mnfordata.onclick = function() {
+						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });					
 						clicked(minfor,"#"+minfor.id); 
+						document.getElementById('infotext').innerHTML = "";
+						if(minforon == 0){
+							document.getElementById('infotext').innerHTML = minfor.properties.name + " has minimum forest area of " + rateById2.get(minfor.id) +
+							" square kilometers.";
+							minforon =1;
+						}
+						else minforon = 0;
 					}
 				}
 
@@ -239,6 +324,7 @@
 						transp = 0.4;
 						durat = 1500;
 						svg.select(code).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						maxco2on = 0; minco2on = 0; maxforon = 0; minforon = 0;
 					}
 					svg.select("g").selectAll("path")
 						.classed("active", centered && function(d) { return d === centered; });
