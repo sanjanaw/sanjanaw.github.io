@@ -31,7 +31,7 @@
 			}
 			#svg {
 				background-color:#0099ff;
-				width: 1800px;
+				width: 1500px;
 				height: 1000px;
 				float:left;
 				padding:5px; 
@@ -112,7 +112,7 @@
 			var svg = d3.select("body").select("#themap").append("svg").attr("id","svg");
 			function showMap(year){
 
-				var width = 1800,
+				var width = 1500,
 				height = 1000, centered;
 				var projection = d3.geo.naturalEarth().scale(300)
 									.translate([width / 2, height / 2]).precision(0.1);
