@@ -245,53 +245,61 @@
 						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
-						clicked(maxco2,"#"+maxco2.id); 
-						document.getElementById('infotext').innerHTML = "";
 						if(maxco2on == 0){
 							document.getElementById('infotext').innerHTML = maxco2.properties.name + " has maximum CO2 emission of " + rateById1.get(maxco2.id) +
 							" metric tons per capita.";
 							maxco2on =1;
 						}
-						else maxco2on = 0;
+						else {
+							maxco2on = 0;
+							document.getElementById('infotext').innerHTML = "";
+						}
+						clicked(maxco2,"#"+maxco2.id); 
 					}
 					mnco2data.onclick = function() { 
 						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
-						clicked(minco2,"#"+minco2.id); 
-						document.getElementById('infotext').innerHTML = "";
 						if(minco2on == 0){
 							document.getElementById('infotext').innerHTML = minco2.properties.name + " has minimum CO2 emission of " + rateById1.get(minco2.id) +
 							" metric tons per capita.";
 							minco2on =1;
 						}
-						else minco2on = 0;
+						else {
+							minco2on = 0;
+							document.getElementById('infotext').innerHTML = "";
+						}
+						clicked(minco2,"#"+minco2.id); 
 					}
 					mxfordata.onclick = function() { 
 						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
-						clicked(maxfor,"#"+maxfor.id); 
-						document.getElementById('infotext').innerHTML = "";
 						if(maxforon == 0){
 							document.getElementById('infotext').innerHTML = maxfor.properties.name + " has maximum forest area of " + rateById2.get(maxfor.id) +
 							" square kilometers.";
 							maxforon =1;
 						}
-						else maxforon = 0;
+						else {
+							maxforon = 0;
+							document.getElementById('infotext').innerHTML = "";
+						}
+						clicked(maxfor,"#"+maxfor.id); 
 					}
 					mnfordata.onclick = function() {
 						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });					
-						clicked(minfor,"#"+minfor.id); 
-						document.getElementById('infotext').innerHTML = "";
 						if(minforon == 0){
 							document.getElementById('infotext').innerHTML = minfor.properties.name + " has minimum forest area of " + rateById2.get(minfor.id) +
 							" square kilometers.";
 							minforon =1;
 						}
-						else minforon = 0;
+						else {
+							minforon = 0;
+							document.getElementById('infotext').innerHTML = "";								
+						}
+						clicked(minfor,"#"+minfor.id); 
 					}
 				}
 
