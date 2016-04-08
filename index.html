@@ -334,6 +334,7 @@
 						durat = 1500;
 						svg.select(code).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						maxco2on = 0; minco2on = 0; maxforon = 0; minforon = 0;
+						document.getElementById('infotext').innerHTML = "";
 					}
 					svg.select("g").selectAll("path")
 						.classed("active", centered && function(d) { return d === centered; });
