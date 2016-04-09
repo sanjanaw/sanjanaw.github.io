@@ -116,7 +116,7 @@
 		</style>
 	</head>
 	<body>
-		<div id = "buttons" style="width:85%;height: 120px; float:left;">
+		<div id = "buttons" style="width:85%;height: 130px; float:left;">
 		<center>
 			<button class="button1" id="b2006">2006</button>
 			<button class="button1" id="b2007">2007</button>
@@ -129,6 +129,13 @@
 				<input id="opOfFor" type="range" min="0" max="1" value="1" step="0.1" onchange="changeOfFill(this.value)" />
 				<label class = "textdec2">Choose opacity for fill of the circles: </label>
 				<input id="opOfCO2" type="range" min="0" max="1" value="0.4" step="0.1" onchange="changeOpOfCircle(this.value)" />
+			</div>
+			<div style="width:100%; float:left;">
+				<label class = "textdec2">Choose threshold for forest cover: Minimum value? 0</label>
+				<input type="range" min="0" max="3050" value="0" step="50" onchange="changeMinthresh(this.value)" />
+				<label class = "textdec2">3050 Maximum value? 3051</label>
+				<input type="range" min="3051" max="6100" value="6100" step="50" onchange="changeMaxthresh(this.value)" />
+				<label class = "textdec2">6100</label>
 			</div>
 		</center>
 		</div>
@@ -147,23 +154,23 @@
 			<text x="0" y="110" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">Forest Area</text>
 			<text x="0" y="120" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in square kilometers)</text>
 			<rect id="squares" class="q0-9" x="0" y="130" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="149" fill="white">Below 610,000</text>
+			<text id="legend1" class = "textdec2" x="22" y="149" fill="white"></text>
 			<rect id="squares" class="q1-9" x="0" y="150" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="169" fill="white">610,000 - 1,450,832</text>
+			<text id="legend2" class = "textdec2" x="22" y="169" fill="white"></text>
 			<rect id="squares" class="q2-9" x="0" y="170" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="189" fill="white">1,450,832 - 2,408,415</text>
+			<text id="legend3" class = "textdec2" x="22" y="189" fill="white"></text>
 			<rect id="squares" class="q3-9" x="0" y="190" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="209" fill="white">2,408,415 - 3,450,681</text>
+			<text id="legend4" class = "textdec2" x="22" y="209" fill="white"></text>
 			<rect id="squares" class="q4-9" x="0" y="210" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="229" fill="white">3,450,681 - 4,560,813</text>
+			<text id="legend5" class = "textdec2" x="22" y="229" fill="white"></text>
 			<rect id="squares" class="q5-9" x="0" y="230" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="249" fill="white">4,560,813 - 5,728,209</text>
+			<text id="legend6" class = "textdec2" x="22" y="249" fill="white"></text>
 			<rect id="squares" class="q6-9" x="0" y="250" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="269" fill="white">5,728,209 - 6,945,481</text>
+			<text id="legend7" class = "textdec2" x="22" y="269" fill="white"></text>
 			<rect id="squares" class="q7-9" x="0" y="270" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="289" fill="white">6,945,481 - 8,207,149</text>
+			<text id="legend8" class = "textdec2" x="22" y="289" fill="white"></text>
 			<rect id="squares" class="q8-9" x="0" y="290" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="309" fill="white">8,207,149 and Above</text>
+			<text id="legend9" class = "textdec2" x="22" y="309" fill="white"></text>
 		</svg>
 		</div>
 		<div id="themap" style="width:85%;height: 1000px; float:left; min-width:1500px;"></div>
@@ -184,6 +191,7 @@
 			var maxco2on = 0, minco2on = 0, maxforon = 0, minforon = 0;
 			var opOfFill = 1; opOfCircle = 0.4;
 			var mouse = false, initx, inity;
+			var minThresh = 0, maxThresh = 6100;
 			var x, y, k; //from clicked(), used in drag(), therefore made global
 			showMap(1);
 			b2006.onclick = function() {
@@ -269,7 +277,7 @@
 						})
 						.await(ready);
 				var quantize = d3.scale.pow().exponent(0.8)
-									.domain([0, 6100])
+									.domain([minThresh, maxThresh])
 									.range(d3.range(9).map(function(i){return i;}));
 				function radius(r){
 					if(typeof r == 'undefined') return 0;
@@ -302,6 +310,10 @@
 								.attr("fill","#990000").on("click",function(d) { clicked(d,"#"+d.id);});
 					d3.selectAll("#circles").attr("fill-opacity", opOfCircle);
 					d3.selectAll("#squares").attr("fill-opacity", opOfFill);
+					
+					for( i=0; i<9; i++){
+						d3.select("#legend"+(i+1)).text( function(a,b,c){ return d3.round(quantize.invert(i)*100).toLocaleString()+ " - "+d3.round(quantize.invert(i+1)*100).toLocaleString();});
+					}
 					for (var i in datac) { 
 						if(datac[i].id=="QAT") {
 							maxco2 = datac[i];
@@ -434,10 +446,6 @@
 				window.addEventListener('mousemove', function(e){drag(e)});
 				window.addEventListener('mousedown', function(e){mouse = (e.which==3); inity = e.pageY; initx = e.pageX; });
 				window.addEventListener('mouseup', function(e){ mouse = false; });				
-				
-				for( i=0; i<=9; i++){
-				console.log(quantize.invert(i));
-				}
 			}
 			function changeOfFill(value){
 				opOfFill = value;
@@ -445,6 +453,14 @@
 			}
 			function changeOpOfCircle(value){
 				opOfCircle = value;
+				showMap(chYear);
+			}
+			function changeMaxthresh(value){
+				maxThresh = value;
+				showMap(chYear);
+			}
+			function changeMinthresh(value){
+				minThresh = value;
 				showMap(chYear);
 			}
 		</script>
