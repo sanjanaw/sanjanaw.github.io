@@ -144,8 +144,8 @@
 		</div>
 		<div id="legend" style = "width:12%; height: 310px; float: right;">
 		<svg height="310">
-			<text x="0" y="15" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">CO2 Emissions</text>
-			<text x="0" y="25" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in metric tons per capita)</text>
+			<text x="0" y="15" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">CO<tspan baseline-shift = "sub" style="font-size:7px;">2</tspan> Emissions</text>
+			<text x="0" y="26" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in metric tons per capita)</text>
 			<circle id="circles" cx ="10" cy ="50" r="5" fill="#990000" />
 			<circle id="circles" cx ="30" cy ="50" r="10" fill="#990000" />
 			<circle id="circles" cx ="60" cy ="50" r="15" fill="#990000" />
@@ -179,14 +179,15 @@
 		<div id="themap" style="width:85%;height: 1000px; float:left; min-width:1500px;"></div>
 		<div id="controls" style="width:12%;height: 375px; float:right;">
 			<br>
-			<input class="button2" type="button" value="Hide CO2 Data!" id="co2"></input> 
+			<input class="button2" type="button" value="Hide CO₂ Data!" id="co2"></input> 
 			<br><br><br>
-			<input class="button2" type="button" value="Max CO2 Data!" id="mxco2data"></input> 
-			<input class="button2" type="button" value="Min CO2 Data!" id="mnco2data"></input> 
+			<input class="button2" type="button" value="Max CO₂ Data!" id="mxco2data"></input> 
+			<input class="button2" type="button" value="Min CO₂ Data!" id="mnco2data"></input> 
 			<input class="button2" type="button" value="Max Forest Data!" id="mxfordata"></input> 
 			<input class="button2" type="button" value="Min Forest Data!" id="mnfordata"></input> 
 		</div>
-		<div id="info" style="width:12%;height: 500px; float:right;">
+		<div id="info" style="width:12%;height: 350px; float:right;">
+		<p id="yeartext" class="textdec"></p>
 		<p id="infotext" class="textdec"></p>
 		</div>
 		<script>
@@ -225,11 +226,11 @@
 			var elem = document.getElementById("co2");
 				if(shData==1){
 					shData = 0;
-					elem.value = "Show CO2 Data!";
+					elem.value = "Show CO₂ Data!";
 				}
 				else {
 					shData = 1;
-					elem.value = "Hide CO2 Data!";
+					elem.value = "Hide CO₂ Data!";
 				}
 				cleardata();
 				showMap(chYear);
@@ -256,26 +257,32 @@
 							if(year==1) {
 								rateById1.set(d.CountryCode, +d.CO2YR2006); 
 								rateById2.set(d.CountryCode, +d.FAYR2006); 
+								document.getElementById('yeartext').innerHTML="For year 2006.";
 								}
 							else if(year==2) {
 								rateById1.set(d.CountryCode, +d.CO2YR2007); 
 								rateById2.set(d.CountryCode, +d.FAYR2007); 
+								document.getElementById('yeartext').innerHTML="For year 2007.";
 								}
 							else if(year==3) {
 								rateById1.set(d.CountryCode, +d.CO2YR2008); 
 								rateById2.set(d.CountryCode, +d.FAYR2008); 
+								document.getElementById('yeartext').innerHTML="For year 2008.";
 								}
 							else if(year==4) {
 								rateById1.set(d.CountryCode, +d.CO2YR2009); 
 								rateById2.set(d.CountryCode, +d.FAYR2009); 
+								document.getElementById('yeartext').innerHTML="For year 2009.";
 								}
 							else if(year==5) {
 								rateById1.set(d.CountryCode, +d.CO2YR2010); 
 								rateById2.set(d.CountryCode, +d.FAYR2010); 
+								document.getElementById('yeartext').innerHTML="For year 2010.";
 								}
 							else if(year==6) {
 								rateById1.set(d.CountryCode, +d.CO2YR2011);
 								rateById2.set(d.CountryCode, +d.FAYR2011);
+								document.getElementById('yeartext').innerHTML="For year 2011.";
 								}								
 						})
 						.await(ready);
@@ -339,7 +346,7 @@
 						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						clicked(maxco2,"#"+maxco2.id); 
 						if(centered!= null && centered.id == maxco2.id){
-							document.getElementById('infotext').innerHTML = maxco2.properties.name + " has maximum CO2 emission of " + rateById1.get(maxco2.id) +
+							document.getElementById('infotext').innerHTML = maxco2.properties.name + " has maximum CO<sub>2</sub> emission of " + rateById1.get(maxco2.id) +
 							" metric tons per capita.";
 							maxco2on =1;
 						}
@@ -354,7 +361,7 @@
 						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						clicked(minco2,"#"+minco2.id); 
 						if(centered!= null && centered.id == minco2.id){
-							document.getElementById('infotext').innerHTML = minco2.properties.name + " has minimum CO2 emission of " + rateById1.get(minco2.id) +
+							document.getElementById('infotext').innerHTML = minco2.properties.name + " has minimum CO<sub>2</sub> emission of " + rateById1.get(minco2.id) +
 							" metric tons per capita.";
 							minco2on =1;
 						}
@@ -398,13 +405,14 @@
 				function hovered(d){
 					d3.select(this).attr("class", "hovered");
 					d3.select(this).append("svg:title")
-						.text(d.properties.name+"\nCO2 Emissions: "+rateById1.get(d.id)+" (metric tons per capita)"
+						.text(d.properties.name+"\nCO₂ Emissions: "+rateById1.get(d.id)+" (metric tons per capita)"
 								+"\nForest Area: "+rateById2.get(d.id)+" (sq. km)").style("visibility", "visible") ;
 				}
 				function nohovered(d){
 					d3.select(this).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 				}
 				function clicked(d, code) {
+					document.getElementById('infotext').innerHTML = "";
 					if (d && centered !== d) {
 						var centroid = path.centroid(d);
 						x = centroid[0];
@@ -424,7 +432,6 @@
 						durat = 1500;
 						svg.select(code).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
 						maxco2on = 0; minco2on = 0; maxforon = 0; minforon = 0;
-						document.getElementById('infotext').innerHTML = "";
 					}
 					svg.select("g").selectAll("path")
 						.classed("active", centered && function(d) { return d === centered; });
