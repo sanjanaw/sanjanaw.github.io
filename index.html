@@ -133,12 +133,12 @@
 			<div style="width:100%; float:left;">
 				<label class = "textdec2">Choose threshold for forest cover: Minimum value? </label>
 				<label class = "textdec2"style="font-size:12px;"> 0 </label>
-				<input type="range" min="0" max="3050" value="0" step="50" onchange="changeMinthresh(this.value)" />
-				<label class = "textdec2"style="font-size:12px;"> 3050 </label>
+				<input type="range" min="0" max="600" value="0" step="30" onchange="changeMinthresh(this.value)" />
+				<label class = "textdec2"style="font-size:12px;"> 600 </label>
 				<label class = "textdec2"> Maximum value? </label>
-				<label class = "textdec2" style="font-size:12px;"> 3051 </label>
-				<input type="range" min="3051" max="6100" value="6100" step="50" onchange="changeMaxthresh(this.value)" />
-				<label class = "textdec2" style="font-size:12px;"> 6100 </label>
+				<label class = "textdec2" style="font-size:12px;"> 601 </label>
+				<input type="range" min="600" max="1200" value="1200" step="30" onchange="changeMaxthresh(this.value)" />
+				<label class = "textdec2" style="font-size:12px;"> 1200 </label>
 			</div>
 		</center>
 		</div>
@@ -195,7 +195,7 @@
 			var maxco2on = 0, minco2on = 0, maxforon = 0, minforon = 0;
 			var opOfFill = 1; opOfCircle = 0.4;
 			var mouse = false, initx, inity;
-			var minThresh = 0, maxThresh = 6100;
+			var minThresh = 0, maxThresh = 1200;
 			var x, y, k; //from clicked(), used in drag(), therefore made global
 			showMap(1);
 			b2006.onclick = function() {
@@ -286,7 +286,7 @@
 								}								
 						})
 						.await(ready);
-				var quantize = d3.scale.pow().exponent(0.8)
+				var quantize = d3.scale.pow().exponent(0.5)
 									.domain([minThresh, maxThresh])
 									.range(d3.range(9).map(function(i){return i;}));
 				function radius(r){
