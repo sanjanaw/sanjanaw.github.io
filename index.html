@@ -147,23 +147,23 @@
 			<text x="0" y="110" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">Forest Area</text>
 			<text x="0" y="120" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in square kilometers)</text>
 			<rect id="squares" class="q0-9" x="0" y="130" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="149" fill="white">111111</text>
+			<text class = "textdec2" x="22" y="149" fill="white">Below 610,000</text>
 			<rect id="squares" class="q1-9" x="0" y="150" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="169" fill="white">2222</text>
+			<text class = "textdec2" x="22" y="169" fill="white">610,000 - 1,450,832</text>
 			<rect id="squares" class="q2-9" x="0" y="170" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="189" fill="white">33333</text>
+			<text class = "textdec2" x="22" y="189" fill="white">1,450,832 - 2,408,415</text>
 			<rect id="squares" class="q3-9" x="0" y="190" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="209" fill="white">44444</text>
+			<text class = "textdec2" x="22" y="209" fill="white">2,408,415 - 3,450,681</text>
 			<rect id="squares" class="q4-9" x="0" y="210" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="229" fill="white">55555</text>
+			<text class = "textdec2" x="22" y="229" fill="white">3,450,681 - 4,560,813</text>
 			<rect id="squares" class="q5-9" x="0" y="230" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="249" fill="white">66666</text>
+			<text class = "textdec2" x="22" y="249" fill="white">4,560,813 - 5,728,209</text>
 			<rect id="squares" class="q6-9" x="0" y="250" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="269" fill="white">77777</text>
+			<text class = "textdec2" x="22" y="269" fill="white">5,728,209 - 6,945,481</text>
 			<rect id="squares" class="q7-9" x="0" y="270" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="289" fill="white">88888</text>
+			<text class = "textdec2" x="22" y="289" fill="white">6,945,481 - 8,207,149</text>
 			<rect id="squares" class="q8-9" x="0" y="290" width="20" height="20"/>
-			<text class = "textdec2" x="22" y="309" fill="white">999999</text>
+			<text class = "textdec2" x="22" y="309" fill="white">8,207,149 and Above</text>
 		</svg>
 		</div>
 		<div id="themap" style="width:85%;height: 1000px; float:left; min-width:1500px;"></div>
@@ -269,7 +269,7 @@
 						})
 						.await(ready);
 				var quantize = d3.scale.pow().exponent(0.8)
-									.domain([0, 6000])
+									.domain([0, 6100])
 									.range(d3.range(9).map(function(i){return i;}));
 				function radius(r){
 					if(typeof r == 'undefined') return 0;
@@ -434,6 +434,10 @@
 				window.addEventListener('mousemove', function(e){drag(e)});
 				window.addEventListener('mousedown', function(e){mouse = (e.which==3); inity = e.pageY; initx = e.pageX; });
 				window.addEventListener('mouseup', function(e){ mouse = false; });				
+				
+				for( i=0; i<=9; i++){
+				console.log(quantize.invert(i));
+				}
 			}
 			function changeOfFill(value){
 				opOfFill = value;
