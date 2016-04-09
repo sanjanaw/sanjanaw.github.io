@@ -86,10 +86,8 @@
 				font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
 				background-color:#0099ff;
 				color: white;
-				padding: 10px 30px;
 				text-decoration: none;
 				font-size: 20px;
-				line-height: 150%;
 			}
 			input[type=range] {
 				-webkit-appearance: none;
@@ -118,7 +116,7 @@
 		</style>
 	</head>
 	<body>
-		<div id = "buttons" style="width:100%;height: 80px; float:center;">
+		<div id = "buttons" style="width:85%;height: 120px; float:left;">
 		<center>
 			<button class="button1" id="b2006">2006</button>
 			<button class="button1" id="b2007">2007</button>
@@ -134,10 +132,43 @@
 			</div>
 		</center>
 		</div>
+		<div id="legend" style = "width:12%; height: 310px; float: right;">
+		<svg height="310">
+			<text x="0" y="15" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">CO2 Emissions</text>
+			<text x="0" y="25" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in metric tons per capita)</text>
+			<circle id="circles" cx ="10" cy ="50" r="5" fill="#990000" />
+			<circle id="circles" cx ="30" cy ="50" r="10" fill="#990000" />
+			<circle id="circles" cx ="60" cy ="50" r="15" fill="#990000" />
+			<circle id="circles" cx ="100" cy ="50" r="20" fill="#990000" />
+			<text class = "textdec2" x="0" y="80" fill="white">5</text>
+			<text class = "textdec2" x="20" y="85" fill="white">10</text>
+			<text class = "textdec2" x="50" y="90" fill="white">15</text>
+			<text class = "textdec2" x="90" y="95" fill="white">20</text>
+			<text x="0" y="110" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">Forest Area</text>
+			<text x="0" y="120" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in square kilometers)</text>
+			<rect id="squares" class="q0-9" x="0" y="130" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="149" fill="white">111111</text>
+			<rect id="squares" class="q1-9" x="0" y="150" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="169" fill="white">2222</text>
+			<rect id="squares" class="q2-9" x="0" y="170" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="189" fill="white">33333</text>
+			<rect id="squares" class="q3-9" x="0" y="190" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="209" fill="white">44444</text>
+			<rect id="squares" class="q4-9" x="0" y="210" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="229" fill="white">55555</text>
+			<rect id="squares" class="q5-9" x="0" y="230" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="249" fill="white">66666</text>
+			<rect id="squares" class="q6-9" x="0" y="250" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="269" fill="white">77777</text>
+			<rect id="squares" class="q7-9" x="0" y="270" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="289" fill="white">88888</text>
+			<rect id="squares" class="q8-9" x="0" y="290" width="20" height="20"/>
+			<text class = "textdec2" x="22" y="309" fill="white">999999</text>
+		</svg>
+		</div>
 		<div id="themap" style="width:85%;height: 1000px; float:left; min-width:1500px;"></div>
-		<div id="controls" style="width:12%;height: 500px; float:right;">
-		<br><br><br>
-		<br><br><br>
+		<div id="controls" style="width:12%;height: 370px; float:right;">
+			<br>
 			<input class="button2" type="button" value="Hide CO2 Data!" id="co2"></input> 
 			<br><br><br>
 			<input class="button2" type="button" value="Max CO2 Data!" id="mxco2data"></input> 
@@ -269,17 +300,8 @@
 														return 0;
 													})
 								.attr("fill","#990000").on("click",function(d) { clicked(d,"#"+d.id);});
-					var legend = d3.select("#info").selectAll("svg");
-					legend.select("#circle1").attr("fill","#990000").attr("fill-opacity", opOfCircle)
-						.attr("cx", "5").attr("cy", "30").attr("r", function(d) { return radius(5); });
-					legend.select("#circle2").attr("fill","#990000").attr("fill-opacity", opOfCircle)
-						.attr("cx", "25").attr("cy", "30").attr("r", function(d) { return radius(10); });
-					legend.select("#circle3").attr("fill","#990000").attr("fill-opacity", opOfCircle)
-						.attr("cx", "55").attr("cy", "30").attr("r", function(d) { return radius(15); });
-					legend.select("#circle4").attr("fill","#990000").attr("fill-opacity", opOfCircle)
-						.attr("cx", "95").attr("cy", "30").attr("r", function(d) { return radius(20); });
-					legend.append("text").attr("y", "80").text("5 10 15 20");
-						
+					d3.selectAll("#circles").attr("fill-opacity", opOfCircle);
+					d3.selectAll("#squares").attr("fill-opacity", opOfFill);
 					for (var i in datac) { 
 						if(datac[i].id=="QAT") {
 							maxco2 = datac[i];
