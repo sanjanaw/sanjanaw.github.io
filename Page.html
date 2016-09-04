@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+	<head>
+		<script src="d3.v3.min.js"></script>
+		<script src="/d3-geomap-1.0.1/js/d3.geomap.min.js"></script>
+		<script src="d3.geo.projection.min.js"></script>
+		<script src="topojson.v1.min.js"></script>
+		<script src="d3-queue.v2.min.js"></script>
+		<style>
+			body{
+				background-color:#0099ff;
+			}
+			.button1{
+				font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+				background-color:#0099ff;
+				color: white;
+				border: 5px solid white;
+				border-radius: 8px;
+				padding: 10px 30px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 20px;
+				line-height: 150%;
+				margin: 5px;
+				width: 125px;
+			}
+			.button1:hover{
+				background-color:white;
+				color: #0099ff;
+				border: none;
+			}
+			.button2{
+				font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+				background-color:#0099ff;
+				color: white;
+				border: 5px solid white;
+				border-radius: 8px;
+				padding: 10px 10px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 20px;
+				line-height: 125%;
+				margin: 4px;
+				width: 200px;
+			}
+			.button2:hover{
+				background-color:white;
+				color: #0099ff;
+				border: none;
+			}
+			#svg {
+				background-color:#0099ff;
+				width: 1500px;
+				height: 1000px;
+				float:left;
+				padding:5px; 
+			}
+			.q0-9 { fill:rgb(230, 255, 153);}
+			.q1-9 { fill:rgb(200, 250, 77);}
+			.q2-9 { fill:rgb(150, 245, 50);}
+			.q3-9 { fill:rgb(100, 210, 0 );}
+			.q4-9 { fill:rgb(60, 180, 0);}
+			.q5-9 { fill:rgb(45, 150, 0);}
+			.q6-9 { fill:rgb(20, 110, 0);}
+			.q7-9 { fill:rgb(5, 70, 0);}
+			.q8-9 { fill:rgb(0, 50, 0);}
+			.hovered{
+				fill-opacity:1;
+				fill: #ff9900;
+				stroke: white;
+				stroke-width:2px;
+			}
+			.textdec{
+				font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+				background-color:#0099ff;
+				color: white;
+				padding: 0px 10px;
+				text-decoration: none;
+				font-size: 25px;
+				line-height: 150%;
+			}
+			.textdec2{
+				font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+				background-color:#0099ff;
+				color: white;
+				text-decoration: none;
+				font-size: 20px;
+			}
+			input[type=range] {
+				-webkit-appearance: none;
+				background-color: white;
+				height:5px;
+			}
+
+			input[type="range"]::-webkit-slider-thumb {
+				 -webkit-appearance: none;
+				background-color: #0099ff;
+				width: 7px;
+				height: 15px;
+				border: 1px solid white;
+				border-radius: 5px;
+			}
+			.legend circle {
+			  fill: white;
+			  stroke: #ccc;
+			}
+
+			.legend text {
+			  fill: #777;
+			  font: 10px sans-serif;
+			  text-anchor: middle;
+			}
+		</style>
+	</head>
+	<body>
+		<div id = "buttons" style="width:85%;height: 120px; float:left;">
+		<center>
+			<button class="button1" id="b2006">2006</button>
+			<button class="button1" id="b2007">2007</button>
+			<button class="button1" id="b2008">2008</button>
+			<button class="button1" id="b2009">2009</button>
+			<button class="button1" id="b2010">2010</button>
+			<button class="button1" id="b2011">2011</button>
+			<div style="width:100%; float:left;">
+				<label class = "textdec2"style="font-size:17px;">Choose opacity for fill of countries: </label>
+				<input id="opOfFor" type="range" min="0" max="1" value="1" step="0.1" onchange="changeOfFill(this.value)" />
+				<label class = "textdec2"style="font-size:17px;">Choose opacity for fill of the circles: </label>
+				<input id="opOfCO2" type="range" min="0" max="1" value="0.4" step="0.1" onchange="changeOpOfCircle(this.value)" />
+			</div>
+			<div style="width:100%; float:left;">
+				<label class = "textdec2" style="font-size:17px;">Choose threshold for forest cover: Minimum value? </label>
+				<input type="range" min="0" max="45000" value="0" step="900" onchange="changeMinthresh(this.value)" />
+				<label class = "textdec2" style="font-size:17px;"> Maximum value? </label>
+				<input type="range" min="45000" max="90000" value="90000" step="900" onchange="changeMaxthresh(this.value)" />
+
+			</div>
+		</center>
+		</div>
+		<div id="legend" style = "width:12%; height: 310px; float: right;">
+		<svg height="310">
+			<text x="0" y="15" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">CO<tspan baseline-shift = "sub" style="font-size:7px;">2</tspan> Emissions</text>
+			<text x="0" y="26" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in metric tons per capita)</text>
+			<circle id="circles" cx ="10" cy ="50" r="5" fill="#990000" />
+			<circle id="circles" cx ="30" cy ="50" r="10" fill="#990000" />
+			<circle id="circles" cx ="60" cy ="50" r="15" fill="#990000" />
+			<circle id="circles" cx ="100" cy ="50" r="20" fill="#990000" />
+			<text class = "textdec2" x="0" y="80" fill="white">5</text>
+			<text class = "textdec2" x="20" y="85" fill="white">10</text>
+			<text class = "textdec2" x="50" y="90" fill="white">15</text>
+			<text class = "textdec2" x="90" y="95" fill="white">20</text>
+			<text x="0" y="110" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">Forest Area</text>
+			<text x="0" y="120" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in square kilometers)</text>
+			<rect id="squares" class="q0-9" x="0" y="130" width="20" height="20"/>
+			<text id="legend1" class = "textdec2" x="22" y="149" fill="white"></text>
+			<rect id="squares" class="q1-9" x="0" y="150" width="20" height="20"/>
+			<text id="legend2" class = "textdec2" x="22" y="169" fill="white"></text>
+			<rect id="squares" class="q2-9" x="0" y="170" width="20" height="20"/>
+			<text id="legend3" class = "textdec2" x="22" y="189" fill="white"></text>
+			<rect id="squares" class="q3-9" x="0" y="190" width="20" height="20"/>
+			<text id="legend4" class = "textdec2" x="22" y="209" fill="white"></text>
+			<rect id="squares" class="q4-9" x="0" y="210" width="20" height="20"/>
+			<text id="legend5" class = "textdec2" x="22" y="229" fill="white"></text>
+			<rect id="squares" class="q5-9" x="0" y="230" width="20" height="20"/>
+			<text id="legend6" class = "textdec2" x="22" y="249" fill="white"></text>
+			<rect id="squares" class="q6-9" x="0" y="250" width="20" height="20"/>
+			<text id="legend7" class = "textdec2" x="22" y="269" fill="white"></text>
+			<rect id="squares" class="q7-9" x="0" y="270" width="20" height="20"/>
+			<text id="legend8" class = "textdec2" x="22" y="289" fill="white"></text>
+			<rect id="squares" class="q8-9" x="0" y="290" width="20" height="20"/>
+			<text id="legend9" class = "textdec2" x="22" y="309" fill="white"></text>
+		</svg>
+		</div>
+		<div id="themap" style="width:85%;height: 1000px; float:left; min-width:1500px;"></div>
+		<div id="controls" style="width:12%;height: 375px; float:right;">
+			<br>
+			<input class="button2" type="button" value="Hide CO₂ Data!" id="co2"></input> 
+			<br><br><br>
+			<input class="button2" type="button" value="Max CO₂ Data!" id="mxco2data"></input> 
+			<input class="button2" type="button" value="Min CO₂ Data!" id="mnco2data"></input> 
+			<input class="button2" type="button" value="Max Forest Data!" id="mxfordata"></input> 
+			<input class="button2" type="button" value="Min Forest Data!" id="mnfordata"></input> 
+		</div>
+		<div id="info" style="width:12%;height: 350px; float:right;">
+		<p id="yeartext" class="textdec"></p>
+		<p id="infotext" class="textdec"></p>
+		</div>
+		<script>
+			var shData = 1, chYear = 1, maxco2 = 0, maxfor = 0, minco2 = 0, minfor = 0;
+			var maxco2on = 0, minco2on = 0, maxforon = 0, minforon = 0;
+			var opOfFill = 1; opOfCircle = 0.4;
+			var mouse = false, initx, inity;
+			var minThresh = 0, maxThresh = 10000, valmaxThresh = 10000;
+			var x, y, k; //from clicked(), used in drag(), therefore made global
+			showMap(1);
+			b2006.onclick = function() {
+				showMap(1); chYear=1;
+				cleardata();
+			};
+			b2007.onclick = function() {
+				showMap(2); chYear=2;
+				cleardata();
+			};
+			b2008.onclick = function() {
+				showMap(3); chYear=3;
+				cleardata();
+			};
+			b2009.onclick = function() {
+				showMap(4); chYear=4;
+				cleardata();
+			};
+			b2010.onclick = function() {
+				showMap(5); chYear=5;
+				cleardata();
+			};
+			b2011.onclick = function() {
+				showMap(6); chYear=6;
+				cleardata();
+			};
+			co2.onclick = function(){
+			var elem = document.getElementById("co2");
+				if(shData==1){
+					shData = 0;
+					elem.value = "Show CO₂ Data!";
+				}
+				else {
+					shData = 1;
+					elem.value = "Hide CO₂ Data!";
+				}
+				cleardata();
+				showMap(chYear);
+			}
+			function cleardata(){
+				maxco2 = 0; maxfor = 0; minco2 = 0; minfor = 0;
+				maxco2on = 0; minco2on = 0; maxforon = 0; minforon = 0;
+				document.getElementById('infotext').innerHTML = "";
+			}
+			var svg = d3.select("body").select("#themap").append("svg").attr("id","svg");
+			function showMap(year){
+				var width = 1500,
+				height = 1000, centered;
+				var projection = d3.geo.naturalEarth().scale(300)
+									.translate([width / 2, height / 2]).precision(0.1);
+				var path = d3.geo.path().projection(projection);
+				var rateById1 = d3.map();
+				var rateById2 = d3.map();
+				d3_queue.queue()
+						.defer(d3.json, "/d3-geomap-1.0.1/topojson/world/countries.json")
+						.defer(d3.csv, "/ExtractedWorldData.csv", 
+						function(d) { 
+							if(year==1) {
+								rateById1.set(d.CountryCode, +d.CO2YR2006); 
+								rateById2.set(d.CountryCode, +d.FAYR2006); 
+								document.getElementById('yeartext').innerHTML="For year 2006.";
+								}
+							else if(year==2) {
+								rateById1.set(d.CountryCode, +d.CO2YR2007); 
+								rateById2.set(d.CountryCode, +d.FAYR2007); 
+								document.getElementById('yeartext').innerHTML="For year 2007.";
+								}
+							else if(year==3) {
+								rateById1.set(d.CountryCode, +d.CO2YR2008); 
+								rateById2.set(d.CountryCode, +d.FAYR2008); 
+								document.getElementById('yeartext').innerHTML="For year 2008.";
+								}
+							else if(year==4) {
+								rateById1.set(d.CountryCode, +d.CO2YR2009); 
+								rateById2.set(d.CountryCode, +d.FAYR2009); 
+								document.getElementById('yeartext').innerHTML="For year 2009.";
+								}
+							else if(year==5) {
+								rateById1.set(d.CountryCode, +d.CO2YR2010); 
+								rateById2.set(d.CountryCode, +d.FAYR2010); 
+								document.getElementById('yeartext').innerHTML="For year 2010.";
+								}
+							else if(year==6) {
+								rateById1.set(d.CountryCode, +d.CO2YR2011);
+								rateById2.set(d.CountryCode, +d.FAYR2011);
+								document.getElementById('yeartext').innerHTML="For year 2011.";
+								}								
+						})
+						.await(ready);
+				var quantize = d3.scale.linear()
+									.domain([minThresh, maxThresh])
+									.range(d3.range(9).map(function(i){return i;}));
+				function radius(r){
+					if(typeof r == 'undefined') return 0;
+					return d3.round(r);
+				}
+				function ready(error, countries) {
+					if (error) throw error;
+					var datac = [], dataf = [];
+					svg.selectAll("g").remove();
+					svg.append("g").attr("fill","#517E9C").attr("fill-opacity", opOfFill)
+								.attr("class", "units zoom")
+								.selectAll("path")
+								.data(topojson.feature(countries, countries.objects.units).features)
+								.enter().append("path").attr("id", function(d){ return d.id; })
+								.attr("stroke", "#66c2ff")
+								.attr("class", function(d) { datac.push(d); return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; })
+								.attr("d", path).on("click",function(d) { clicked(d,"#"+d.id);}).on("mouseover", hovered).on("mouseout",nohovered);
+					svg.append("g")
+								.attr("class", "units zoom")
+								.selectAll("circle")
+								.data(topojson.feature(countries, countries.objects.units).features)
+								.enter().append("circle").attr("fill-opacity", opOfCircle)
+								.attr("transform", function(d) {  dataf.push(d); return "translate(" + path.centroid(d) + ")"; })
+								.attr("r", function(d){ 
+													if(shData==1)
+														return radius(rateById1.get(d.id));
+													else
+														return 0;
+													})
+								.attr("fill","#990000").on("click",function(d) { clicked(d,"#"+d.id);});
+					d3.selectAll("#circles").attr("fill-opacity", opOfCircle);
+					d3.selectAll("#squares").attr("fill-opacity", opOfFill);
+					
+					for( i=0; i<9; i++){
+						d3.select("#legend"+(i+1)).text( function(a,b,c){ return d3.round(quantize.invert(i)*100).toLocaleString()+ " - "+d3.round(quantize.invert(i+1)*100).toLocaleString();});
+					}
+					for (var i in datac) { 
+						if(datac[i].id=="QAT") {
+							maxco2 = datac[i];
+						}
+						if(datac[i].id=="BDI") {
+							minco2 = datac[i];
+						}
+					}
+					for (var i in dataf) { 
+						if(dataf[i].id=="RUS") {
+							maxfor = dataf[i];
+						}
+						if(dataf[i].id=="QAT") {
+							minfor = dataf[i];
+						}
+					}
+					mxco2data.onclick = function() { 
+						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						clicked(maxco2,"#"+maxco2.id); 
+						if(centered!= null && centered.id == maxco2.id){
+							document.getElementById('infotext').innerHTML = maxco2.properties.name + " has maximum CO<sub>2</sub> emission of " + rateById1.get(maxco2.id) +
+							" metric tons per capita.";
+							maxco2on =1;
+						}
+						else {
+							maxco2on = 0;
+							document.getElementById('infotext').innerHTML = "";
+						}
+					}
+					mnco2data.onclick = function() { 
+						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						clicked(minco2,"#"+minco2.id); 
+						if(centered!= null && centered.id == minco2.id){
+							document.getElementById('infotext').innerHTML = minco2.properties.name + " has minimum CO<sub>2</sub> emission of " + rateById1.get(minco2.id) +
+							" metric tons per capita.";
+							minco2on =1;
+						}
+						else {
+							minco2on = 0;
+							document.getElementById('infotext').innerHTML = "";
+						}
+					}
+					mxfordata.onclick = function() { 
+						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(minforon == 1) svg.select("#"+minfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						clicked(maxfor,"#"+maxfor.id); 
+						if(centered!= null && centered.id == maxfor.id){
+							document.getElementById('infotext').innerHTML = maxfor.properties.name + " has maximum forest area of " + rateById2.get(maxfor.id) +
+							" square kilometers.";
+							maxforon =1;
+						}
+						else {
+							maxforon = 0;
+							document.getElementById('infotext').innerHTML = "";
+						}
+					}
+					mnfordata.onclick = function() {
+						if(minco2on == 1) svg.select("#"+minco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxco2on == 1) svg.select("#"+maxco2.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						if(maxforon == 1) svg.select("#"+maxfor.id).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });					
+						clicked(minfor,"#"+minfor.id); 
+						if(centered!= null && centered.id == minfor.id){
+							document.getElementById('infotext').innerHTML = minfor.properties.name + " has minimum forest area of " + rateById2.get(minfor.id) +
+							" square kilometers.";
+							minforon =1;
+						}
+						else {
+							minforon = 0;
+							document.getElementById('infotext').innerHTML = "";								
+						}
+					}
+				}
+
+				function hovered(d){
+					d3.select(this).attr("class", "hovered");
+					d3.select(this).append("svg:title")
+						.text(d.properties.name+"\nCO₂ Emissions: "+rateById1.get(d.id)+" (metric tons per capita)"
+								+"\nForest Area: "+rateById2.get(d.id)+" (sq. km)").style("visibility", "visible") ;
+				}
+				function nohovered(d){
+					d3.select(this).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+				}
+				function clicked(d, code) {
+					document.getElementById('infotext').innerHTML = "";
+					if (d && centered !== d) {
+						var centroid = path.centroid(d);
+						x = centroid[0];
+						y = centroid[1];
+						k = 4;
+						centered = d;
+						transp = 0;
+						durat = 100;
+						console.log(code);
+						svg.select(code).attr("class", "hovered");
+					} else {
+						x = width / 2;
+						y = height / 2;
+						k = 1;
+						centered = null;
+						transp = opOfCircle;
+						durat = 1500;
+						svg.select(code).attr("class", function(d) { return "q"+d3.round(quantize(rateById2.get(d.id)/100))+"-9"; });
+						maxco2on = 0; minco2on = 0; maxforon = 0; minforon = 0;
+					}
+					svg.select("g").selectAll("path")
+						.classed("active", centered && function(d) { return d === centered; });
+					svg.select("g").transition()
+						.duration(750)
+						.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+						.style("stroke-width", 1.5 / k + "px");
+					svg.selectAll("circle").transition()
+						.duration(durat)
+						.attr("fill-opacity", transp);
+				}
+				function drag(d){
+					if((d.which==3) && mouse==true && centered!=null){
+						svg.select("g")
+						.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")translate(" + ( d.pageX -initx)/2 + "," + (d.pageY - inity)/2 + ")")
+						.style("stroke-width", 1.5 / k + "px");		
+					}
+				}
+				
+				d3.select(self.frameElement).style("height", height + "px");	
+	
+				window.addEventListener('mousemove', function(e){drag(e)});
+				window.addEventListener('mousedown', function(e){mouse = (e.which==3); inity = e.pageY; initx = e.pageX; });
+				window.addEventListener('mouseup', function(e){ mouse = false; });				
+			}
+			function changeOfFill(value){
+				opOfFill = value;
+				showMap(chYear);
+			}
+			function changeOpOfCircle(value){
+				opOfCircle = value;
+				showMap(chYear);
+			}
+			function changeMaxthresh(value){
+				maxThresh = value/9;
+				showMap(chYear);
+			}
+			function changeMinthresh(value){
+				minThresh = value/9;
+				showMap(chYear);
+			}
+		</script>
+	</body>
+</html>
