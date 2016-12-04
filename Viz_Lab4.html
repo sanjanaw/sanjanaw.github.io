@@ -139,7 +139,7 @@
 			</div>
 		</center>
 		</div>
-		<div id="legend" style = "width:15%; height: 310px; float: right;">
+		<div id="legend" style = "height: 310px; float: right;">
 		<svg height="310">
 			<text x="0" y="15" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 15px;">CO<tspan baseline-shift = "sub" style="font-size:7px;">2</tspan> Emissions</text>
 			<text x="0" y="26" fill="white" style="font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;font-size: 10px;">(in metric tons per capita)</text>
@@ -173,7 +173,7 @@
 			<text id="legend9" class = "textdec2" x="22" y="309" fill="white"></text>
 		</svg>
 		</div>
-		<div id="themap" style="width:85%; height:600px; float:left; min-width:800px"></div>
+		<div id="themap" style="width:85%; height:600px; float:left; min-width:1000px"></div>
 		<div id="controls" style="width:12%;height: 375px; float:right;">
 			<br>
 			<input class="button2" type="button" value="Hide CO₂ Data!" id="co2"></input> 
@@ -239,7 +239,7 @@
 			}
 			var svg = d3.select("body").select("#themap").append("svg").attr("id","svg");
 			function showMap(year){
-				var width = 800,
+				var width = 1000,
 				height = 600, centered;
 				var projection = d3.geo.naturalEarth().scale(210)
 									.translate([width / 2, height / 2]).precision(0.1);
