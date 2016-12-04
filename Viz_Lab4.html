@@ -173,7 +173,7 @@
 			<text id="legend9" class = "textdec2" x="22" y="309" fill="white"></text>
 		</svg>
 		</div>
-		<div id="themap" style="width:70%; float:left; "></div>
+		<div id="themap" style="width:70%; float:left; min-width:1000px"></div>
 		<div id="controls" style="width:12%;height: 375px; float:right;">
 			<br>
 			<input class="button2" type="button" value="Hide CO₂ Data!" id="co2"></input> 
@@ -239,8 +239,8 @@
 			}
 			var svg = d3.select("body").select("#themap").append("svg").attr("id","svg");
 			function showMap(year){
-				var width = 1500,
-				height = 1000, centered;
+				var width = 1000,
+				height = 800, centered;
 				var projection = d3.geo.naturalEarth().scale(300)
 									.translate([width / 2, height / 2]).precision(0.1);
 				var path = d3.geo.path().projection(projection);
