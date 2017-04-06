@@ -60,6 +60,7 @@ for rownum in range(1,dat.nrows):
     keyword = keywords.split(',')
     authors = unicode(dat.cell(rownum,13).value).encode("utf-8")
     abstract = unicode(dat.cell(rownum,9).value).encode("utf-8")
+    paper_type = str(dat.cell(rownum,8))
     link = str(dat.cell(rownum,4).value)
     title = str(dat.cell(rownum,2).value)
     year = dat.cell(rownum, 1).value
@@ -84,7 +85,7 @@ for rownum in range(1,dat.nrows):
             citations = 0
             cit_yr = year
         importance = (citations+1) * math.exp(-(2017-year)*(2017-year)/(10*(cit_yr-year+1)))
-        node_list.append([num,int(year),int(citations),cit_yr, title, color, importance, 0, y[int(year-1990)],str(keywords),authors,abstract,link])
+        node_list.append([num,int(year),int(citations),cit_yr, title, color, importance, 0, y[int(year-1990)],str(keywords),authors,abstract,link,paper_type])
         if str(keyword[0])=='':
             year_list[int(year)].append([num,1, num, title])
         else:
@@ -154,7 +155,7 @@ for rownum in range(1,dat.nrows):
 #print min([t[7] for t in node_list])
 
 for it in range(len(node_list)):
-    final['nodes'].append({'name':node_list[it][0], 'x':(node_list[it][1]-1989), 'y':node_list[it][6], 'title':node_list[it][4], 'color':node_list[it][5], 'size':node_list[it][2], 'author':node_list[it][7], 'y_pos':node_list[it][8], 'keywords':node_list[it][9], 'authors':node_list[it][10], 'abstract':node_list[it][11],'link':node_list[it][12]})
+    final['nodes'].append({'name':node_list[it][0], 'x':(node_list[it][1]-1989), 'y':node_list[it][6], 'title':node_list[it][4], 'color':node_list[it][5], 'size':node_list[it][2], 'author':node_list[it][7], 'y_pos':node_list[it][8], 'keywords':node_list[it][9], 'authors':node_list[it][10], 'abstract':node_list[it][11],'link':node_list[it][12],'paper_type':node_list[it][13]})
 
 for it in range(len(link_list)):
     if link_list[it][1] in [t[0] for t in node_list]:
