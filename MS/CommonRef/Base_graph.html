@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+div.hover {	
+    position: absolute;			
+    text-align: center;			
+    width: 200px;					
+    padding: 2px;				
+    font: 12px monospace;	
+    background: white;	
+    border: 0px;		
+    border-radius: 8px;		
+}
+</style>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<body>
+</body>
+
+<script>
+
+var w = 2500, h = 1000;
+
+var svg = d3.select("body")
+   .append("svg")
+   .attr("width", w)
+   .attr("height", h)
+
+var graph = svg.append("g")
+   .attr("transform","translate(0,30)");
+
+var x = d3.scaleLinear().range([50,1300]).domain([1990,2015]);
+svg.append("g")
+   .attr("transform","translate(0,20)")
+   .call(d3.axisTop(x));
+
+var hover = d3.select("body").append("div")
+    .attr("class","hover")
+    .style("position","absolute")	
+    .style("opacity", 0);
+
+d3.json("data_format.json", function(error, data){
+
+ var links = graph.selectAll("link")
+   .data(data.links)
+   .enter()
+   .append("line")
+   .attr("x1", function(l) {
+     var sourceNode = data.nodes.filter(function(d, i) {
+       return i == l.source
+     })[0];
+     d3.select(this).attr("y1", sourceNode.y);
+     return sourceNode.x
+   })
+   .attr("x2", function(l) {
+     var targetNode = data.nodes.filter(function(d, i) {
+       return i == l.target
+     })[0];
+     d3.select(this).attr("y2", targetNode.y);
+     return targetNode.x
+   })
+   .attr("fill", "none")
+   .attr("stroke", "dimgrey")
+   .attr("stroke-opacity","0.5")
+   .attr("stroke-width","0.5px");
+
+ var nodes = graph.selectAll("node")
+   .data(data.nodes)
+   .enter()
+   .append("circle")
+   .attr("cx", function(d) {
+     return d.x
+   })
+   .attr("cy", function(d) {
+     return d.y
+   })
+   .attr("r", 5)
+   .attr("fill", function(d, i) {
+     return d.color;
+   })
+   .on("mouseover",function(d){
+      hover.style("opacity",1)
+         .style("left", (d3.event.pageX+20) + "px")		
+         .style("top", (d3.event.pageY) + "px")	
+         .html(d.title);
+   })
+   .on("mouseout",function(d){
+      hover.style("opacity",0);
+   });
+
+});
+</script>

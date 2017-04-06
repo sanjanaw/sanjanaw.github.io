@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+div.hover {	
+    position: absolute;			
+    text-align: center;			
+    width: 200px;					
+    padding: 2px;				
+    font: 12px monospace;	
+    background: white;	
+    border: 0px;		
+    border-radius: 8px;	
+    box-shadow: 5px 5px 5px #888888;	
+}
+.button {
+    width: 50px;
+    height: 20px;
+    background-color: white;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    font-family:'AppleGothic';
+    font-size: 12px;
+}
+.sm-button {
+    width: 25px;
+    height: 20px;
+    background-color: white;
+    border: none;
+}
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto;
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 10px;
+    border: 1px solid #888;
+    width: 70%;
+    border-radius: 8px;	
+    box-shadow: 10px 10px 5px #888888;		
+}
+.close {
+    font: 12px monospace;	
+    color: #aaaaaa;
+    float: right;
+    font-size: 16px;
+    font-weight: bold;
+}
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+.labels {
+    text-align: right;
+    text-decoration: none;
+    font-family:'AppleGothic';
+    font-size: 16px;
+}
+.wordcloud
+{
+    text-decoration: none;
+    font-family:'AppleGothic';
+    font-weight:bold;
+}
+</style>
+
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="d3.layout.cloud.js"></script>
+
+<body>
+</body>
+
+<script>
+
+var w = 1325, h = 950;
+
+var y_scale = 40, x_scale = 50, y_time_scale = 25, y_author_scale = 5; 
+
+var cit_thresh = 10;
+
+var nodeOp = 1, linkOp = 0.5;
+
+var node_size_bool = 1, time_bool = 1, author_bool = 0, all_bool = 0;
+
+d3.select("body").append("div")
+   .attr("class","modal")
+   .attr("id","modal")
+   .append("div")
+   .attr("class","modal-content")
+   .append("span")
+   .attr("class","close")
+   .attr("id","close")
+   .text("x")
+   .on("click",function(){
+    document.getElementById("modal").style.display = "none";
+    d3.selectAll(".wordcloud").remove();
+    d3.select("#modal-heading").remove();
+   });
+
+d3.select("body").append("div")
+   .attr("class","modal")
+   .attr("id","modal2")
+   .append("div")
+   .attr("class","modal-content")
+   .attr("id","modal-content2")
+   .append("span")
+   .attr("class","close")
+   .attr("id","close2")
+   .text("x")
+   .on("click",function(){
+    document.getElementById("modal2").style.display = "none";
+    d3.select("#modal-heading2").remove();
+   });
+
+var main_div = d3.select("body")
+   .append("div");
+
+var svg = main_div
+   .append("div")
+   .append("svg")
+   .attr("width", w)
+   .attr("height", h);
+
+//Axis:
+var x = d3.scale.linear().range([50,1300]).domain([1990,2015]);
+var axis = d3.svg.axis().scale(x)
+   .orient("top").ticks(26).tickFormat(function(d){ return "";});
+svg.append("g")
+   .call(axis) 
+   .attr("fill","none")
+   .attr("stroke","black")
+   .attr("transform","translate(0,10)");
+
+var graph = svg.append("g")
+   .attr("transform","translate(0,50)");
+
+var hover = d3.select("body").append("div")
+    .attr("class","hover")
+    .style("position","absolute")	
+    .style("opacity", 0);
+
+//Data available:
+d3.json("data_format.json", function(error, data){
+
+//Controls for criteria:
+var NodOp = main_div.append("div")
+    .attr("id","controls")
+    .attr("width",350)
+    .attr("height",h)
+    .attr("style","position:absolute;right:0px;top:20px")
+    .append("div")
+NodOp.append("label")
+    .attr("class","labels")
+    .attr("style","width: 250px;position:absolute;right:200px;")
+    .text("Choose Opacity for Nodes:")
+NodOp.append("input").attr("type","range")
+    .attr("style","width:150px;position:absolute;right:0px;")
+    .attr("min",0)
+    .attr("max",1)
+    .attr("step",0.1)
+    .on("input",function(){ nodeOp = this.value; updateGraph();});
+var LinOp = d3.select("#controls")
+    .append("div")
+LinOp.append("label")
+    .attr("class","labels")
+    .attr("style","width: 250px;position:absolute;right:200px;top:20px")
+    .text("Choose Opacity for Links:")
+LinOp.append("input").attr("type","range")
+    .attr("style","width:150px;position:absolute;right:0px;top:20px")
+    .attr("min",0)
+    .attr("max",10)
+    .attr("value",5)
+    .attr("step",1)
+    .on("input",function(){ linkOp = this.value/10; updateGraph();});
+var thres = d3.select("#controls")
+    .append("div")
+thres.append("label")
+    .attr("class","labels")
+    .attr("style","width:325px;position:absolute;right:200px;top:40px")
+    .text("Choose Threshold for Number of Citations:")
+    .on("mouseover",function(d){
+      hover.style("opacity",1)
+         .style("left", (d3.event.pageX) + "px")		
+         .style("top", (d3.event.pageY) + "px")	
+         .html("The total number of times this paper has been cited since its publication.");
+    })
+    .on("mouseout",function(d){
+      hover.style("opacity",0);
+    });
+thres.append("input").attr("type","number")
+    .attr("style","width:50px;position:absolute;right:100px;top:40px")
+    .attr("min",0)
+    .attr("max",70)
+    .attr("value",10)
+    .attr("step",1)
+    .on("input",function(){ cit_thresh = this.value-1; updateGraph();});
+var nodSiz = d3.select("#controls")
+    .append("div")
+nodSiz.append("label")
+    .attr("class","labels")
+    .attr("style","width:325px;position:absolute;right:200px;top:80px")
+    .text("Node Size by Number of Citations?");
+nodSiz.append("input").attr("type","checkbox").attr("id","node_size_button")
+    .attr("style","width:10px;position:absolute;right:140px;top:80px")
+    .property("checked", true)
+    .on("input",function(){ 
+            if(node_size_bool == 1) node_size_bool = 0;
+            else if(node_size_bool == 0) node_size_bool = 1;
+            updateGraph();            
+     });
+var time = d3.select("#controls")
+    .append("div")
+time.append("label")
+    .attr("class","labels")
+    .attr("style","width:325px;position:absolute;right:200px;top:100px")
+    .text("Include Time in Importance?")
+    .on("mouseover",function(d){
+      hover.style("opacity",1)
+         .style("left", (d3.event.pageX) + "px")		
+         .style("top", (d3.event.pageY) + "px")	
+         .html("Date of publication and last cited date is included as exponential decay function to generate overall importance of paper.");
+    })
+    .on("mouseout",function(d){
+      hover.style("opacity",0);
+    });
+time.append("input").attr("type","checkbox").attr("id","time_button")
+    .attr("style","width:10px;position:absolute;right:140px;top:100px")
+    .property("checked", true)
+    .on("input",function(){
+        if(time_bool==1){ time_bool = 0; node_size_bool = 0; d3.select("#node_size_button").property("checked",false);}
+        else if(time_bool == 0){ time_bool = 1; all_bool = 0;  d3.select("#all_button").property("checked",false);}
+        updateGraph();
+    });
+var author = d3.select("#controls")
+    .append("div")
+author.append("label")
+    .attr("class","labels")
+    .attr("style","width:325px;position:absolute;right:200px;top:120px")
+    .text("Include Author in Importance?")
+    .on("mouseover",function(d){
+      hover.style("opacity",1)
+         .style("left", (d3.event.pageX) + "px")		
+         .style("top", (d3.event.pageY) + "px")	
+         .html("Rank of author is included in calculating imporance of paper.");
+    })
+    .on("mouseout",function(d){
+      hover.style("opacity",0);
+    });
+author.append("input").attr("type","checkbox").attr("id","author_button")
+    .attr("style","width:10px;position:absolute;right:140px;top:120px")
+    .on("input",function(){ 
+            if(author_bool == 1) author_bool = 0;
+            else if(author_bool==0) { author_bool =1; all_bool = 0;  d3.select("#all_button").property("checked",false);}
+            updateGraph();
+     });
+var allNod = d3.select("#controls")
+    .append("div")
+allNod.append("label")
+    .attr("class","labels")
+    .attr("style","width:325px;position:absolute;right:200px;top:140px")
+    .text("Show All Papers?");
+allNod.append("input").attr("type","checkbox").attr("id","all_button")
+    .attr("style","width:10px;position:absolute;right:140px;top:140px")
+    .on("input",function(){ 
+            if(all_bool ==1) { all_bool = 0; }
+            else if(all_bool==0) { all_bool = 1; author_bool = 0; time_bool = 0; node_size_bool = 0;  
+                                d3.select("#node_size_button").property("checked",false);
+                                d3.select("#time_button").property("checked",false);
+                                d3.select("#author_button").property("checked",false);}
+            updateGraph();
+     });
+
+//Generate nodes and links:
+updateGraph();
+function updateGraph(){
+ //Clear canvas:
+ graph.selectAll("line").remove();
+ graph.selectAll("circle").remove();
+ graph.selectAll("marker").remove();
+ d3.selectAll("#legend").remove();
+ 
+ //Draw legend for colour and size (dynamic):
+ var legend = d3.select("#controls")
+    .append("div").attr("id","legend")
+ var link_leg = legend.append("div")
+ link_leg.append("text")
+    .attr("class","labels")
+    .attr("style","width:325px;position:absolute;right:100px;top:500px")
+    .text("Directed Arrow represents Cited Paper:")
+    .on("mouseover",function(d){
+      hover.style("opacity",1)
+         .style("left", (d3.event.pageX) + "px")		
+         .style("top", (d3.event.pageY) + "px")	
+         .html("Head of arrow points to paper that is cited.");
+    })
+    .on("mouseout",function(d){
+      hover.style("opacity",0);
+    });
+ link_leg.append("svg")
+   .attr("style","width:60px;height:20px;position:absolute;right:30px;top:500px")
+   .append("line")
+   .attr("x1",5).attr("y1",10)
+   .attr("x2",45).attr("y2",10).attr("marker-end",function(){
+       graph.append("defs").append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "-5 -5 10 10")
+        .attr("refX", 0)
+        .attr("refY", 0)
+        .attr("markerWidth", 10)
+        .attr("markerHeight", 10)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M 0,0 m -5,-5 L 5,0 L -5,5 Z")
+        .attr("fill", "none")
+        .attr("stroke", "dimgrey")
+        .attr("stroke-opacity",linkOp)
+        .attr("stroke-width","1px")
+       return "url(#arrow)";
+     })
+   .attr("fill", "none")
+   .attr("stroke", "dimgrey")
+   .attr("stroke-opacity",linkOp)
+   .attr("stroke-width","0.5px");
+
+var node_size = legend.append("div").append("svg")
+    .attr("style","width:400px; height:300px;position:absolute;right:0px;top:520px")
+for (var i = 2; i <9; i++){
+ n = 15; c = "orangered"
+ if(i==1){ n = 2; t = "Node Size for "+n+" Citations:", dx = 110}
+ if(i==2){ n = 5; t = "Node Size for "+n+" Citations:", dx = 110}
+ if(i==3){ n = 10; t = "Node Size for "+n+" Citations:", dx = 100}
+ if(i==4){ n = 20; t = "Node Size for "+n+" Citations:", dx = 100}
+ if(i==5){ c = "darkturquoise"; t = "Publications from InfoVis:", dx = 109}
+ if(i==6){ c = "forestgreen"; t = "Publications from SciVis:", dx = 118}
+ if(i==7){ c = "gold"; t = "Publications from VAST:", dx = 122}
+ if(i==8){ c = "orangered"; t = "All Other Publications:", dx = 134}
+ 
+ node_size.append("text")
+    .attr("class","labels")
+    .attr("dx",dx)
+    .attr("dy",i*30-30)
+    .text(t);
+ node_size.append("circle")
+   .attr("cx", 330)
+   .attr("cy", i*30-35)
+   .attr("r", n)
+   .attr("fill", c)
+   .attr("fill-opacity", nodeOp)
+   .attr("stroke","white")
+   .attr("stroke-width",0.5);
+}
+ var links = graph.selectAll("link")
+   .data(data.links)
+   .enter()
+   .append("line")
+   .filter(function(d){ return (d.sourceSize > cit_thresh && d.targetSize > cit_thresh)})
+   .attr("x1", function(l) {
+     var sourceNode = data.nodes.filter(function(d, i) {
+       return i == l.source
+     })[0];
+     d3.select(this).attr("y1", ((sourceNode.y*time_bool*y_scale+sourceNode.size*(1-time_bool)*y_time_scale)*(Math.log(sourceNode.author+1)*author_bool/y_author_scale+(1-author_bool)))*(1-all_bool)+all_bool*sourceNode.y_pos);
+     return sourceNode.x * x_scale
+   })
+   .attr("x2", function(l) {
+     var targetNode = data.nodes.filter(function(d, i) {
+       return i == l.target
+     })[0];
+     d3.select(this).attr("y2", ((targetNode.y*time_bool*y_scale + targetNode.size*(1-time_bool)*y_time_scale)*(Math.log(targetNode.author+1)*author_bool/y_author_scale+1-author_bool))*(1-all_bool)+all_bool*targetNode.y_pos);
+     d3.select(this).attr("marker-end",function(){
+       graph.append("defs").append("marker")
+        .attr("id", "arrow"+l.target)
+        .attr("viewBox", "-5 -5 10 10")
+        .attr("refX", l.targetSize*2*node_size_bool+10)
+        .attr("refY", 0)
+        .attr("markerWidth", 10)
+        .attr("markerHeight", 10)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M 0,0 m -5,-5 L 5,0 L -5,5 Z")
+        .attr("fill", "none")
+        .attr("stroke", "dimgrey")
+        .attr("stroke-opacity",linkOp)
+        .attr("stroke-width","1px")
+       return "url(#arrow"+l.target+")";
+     })
+     return targetNode.x * x_scale;
+   })
+   .attr("fill", "none")
+   .attr("stroke", "dimgrey")
+   .attr("stroke-opacity",linkOp)
+   .attr("stroke-width","0.5px");
+    
+ var nodes = graph.selectAll("node")
+   .data(data.nodes)
+   .enter()
+   .append("circle")
+   .filter(function(d){return d.size>cit_thresh;})
+   .attr("cx", function(d) {
+     return d.x*x_scale
+   })
+   .attr("cy", function(d) {
+     return ((d.y*time_bool*y_scale+d.size*(1-time_bool)*y_time_scale)*(Math.log(d.author+1)*author_bool/y_author_scale+1-author_bool))*(1-all_bool)+all_bool*d.y_pos;
+   })
+   .attr("r", function(d){
+     return (d.size)*node_size_bool + (node_size_bool-1)*(-5)
+   })
+   .attr("fill", function(d, i) {
+     return d.color
+   })
+   .attr("fill-opacity", nodeOp)
+   .attr("stroke","white")
+   .attr("stroke-width",0.5)
+   .on("mouseover",function(d){
+      hover.style("opacity",1)
+         .style("left", (d3.event.pageX+20) + "px")		
+         .style("top", (d3.event.pageY) + "px")	
+         .html(d.title);
+   })
+   .on("mouseout",function(d){
+      hover.style("opacity",0);
+   })
+   .on("click", function(d){
+      d3.select("#modal-content2").append("div").attr("id","modal-heading2")
+      .append("text").attr("class","labels").html("<text style='font-size:20px'><center>"+d.title+"</center></style><br>")
+      .append("text").attr("class","sub-heading").html("<br><br>Keywords from the paper:")
+      .append("text").attr("class","sub-heading").html("<br>"+d.keywords)
+      .append("text").attr("class","sub-heading").html("<br><br>Abstract of the paper:")
+      .append("text").attr("class","sub-heading").html("<br>"+d.abstract)
+      .append("text").attr("class","sub-heading").html("<br><br>Authors of the paper:")
+      .append("text").attr("class","sub-heading").html("<br>"+d.authors)
+      .append("text").attr("class","sub-heading").html("<br><br><a href="+d.link+">Link to the paper</a>");
+      document.getElementById("modal2").style.display = "block"; 
+   });
+}//End of update graph
+
+//Year buttons:
+ var add_buttons = d3.select("body").insert("g",":first-child");
+ add_buttons.append("input")
+    .attr("class","sm-button")
+    .attr("type", "button");
+
+ for(var it = 1990; it <=2015; it++){
+  add_buttons.append("input")
+    .attr("class","button")
+    .attr("type", "button")
+    .attr("value", it)
+    .on("click", function(){
+      var color = d3.scale.category20();
+      year = this.value;
+      d3.select(".modal-content").append("div").attr("id","modal-heading")
+      .append("text").attr("class","labels").html("<text style='font-size:20px'><center>For the year "+year+"</center></style>");
+      document.getElementById("modal").style.display = "block"; 
+      words = data[year].map(function(word){
+        return {
+          text: word[2],
+          size: +word[1]*10,
+          title: word[3]
+        }
+      }); 
+
+      //Start word cloud:
+
+      d3.layout.cloud().size([1000, 600])
+        .words(words)
+        .title(function(d) { return d.title; })
+        .rotate(0)
+        .fontSize(function(d) { return d.size; })
+        .on("end", draw)
+        .start();
+        
+       function draw(words) {
+        d3.select(".modal-content").append("svg")
+                .attr("width", 1500)
+                .attr("height", 800)
+                .attr("class", "wordcloud")
+                .append("g")
+                .attr("transform", "translate(400,400)")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return d.size + "px"; })
+                .style("fill", function(d, i) { return color(i); })
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; })
+                .on("mouseover",function(d){
+		    hover.style("opacity",1)
+                         .style("z-index",2)
+			 .style("left", (d3.event.pageX+20) + "px")		
+			 .style("top", (d3.event.pageY) + "px")	
+			 .html(d.title);
+		})
+		.on("mouseout",function(d){
+		      hover.style("opacity",0);
+		});
+      }        
+    });
+ }
+
+});
+</script>
