@@ -60,7 +60,7 @@ for rownum in range(1,dat.nrows):
     keyword = keywords.split(',')
     authors = unicode(dat.cell(rownum,13).value).encode("utf-8")
     abstract = unicode(dat.cell(rownum,9).value).encode("utf-8")
-    paper_type = str(dat.cell(rownum,8))
+    paper_type = unicode(dat.cell(rownum,8).value).encode("utf-8")
     link = str(dat.cell(rownum,4).value)
     title = str(dat.cell(rownum,2).value)
     year = dat.cell(rownum, 1).value
@@ -72,6 +72,12 @@ for rownum in range(1,dat.nrows):
         color = 'gold'
     else:
         color = 'orangered'
+    if paper_type == "C":
+        paper_colour = 'darkmagenta'
+    elif paper_type == "J":
+        paper_colour = 'midnightblue'
+    else:
+        paper_colour = 'darkgreen'
     y[int(year-1990)] += 5
     if num != -1:
         if isinstance(num,float):
@@ -85,7 +91,7 @@ for rownum in range(1,dat.nrows):
             citations = 0
             cit_yr = year
         importance = (citations+1) * math.exp(-(2017-year)*(2017-year)/(10*(cit_yr-year+1)))
-        node_list.append([num,int(year),int(citations),cit_yr, title, color, importance, 0, y[int(year-1990)],str(keywords),authors,abstract,link,paper_type])
+        node_list.append([num,int(year),int(citations),cit_yr, title, color, importance, 0, y[int(year-1990)],str(keywords),authors,abstract,link,paper_colour])
         if str(keyword[0])=='':
             year_list[int(year)].append([num,1, num, title])
         else:
@@ -148,7 +154,7 @@ for rownum in range(1,dat.nrows):
                 pre_rank = aut_rank[name]
         node_list[ind][7] = pre_rank
 
-#print node_list
+print node_list
 #print link_list
 #print year_list
 #print aut_rank

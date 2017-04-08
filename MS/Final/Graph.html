@@ -47,7 +47,11 @@ div.hover {
     border: 1px solid #888;
     width: 70%;
     border-radius: 8px;	
-    box-shadow: 10px 10px 5px #888888;		
+    box-shadow: 10px 10px 5px #888888;	
+    position:absolute;
+    top:50px;
+    left:15%;
+    text-align:justify;
 }
 .close {
     font: 12px monospace;	
@@ -86,13 +90,13 @@ div.hover {
 
 var w = 1325, h = 950;
 
-var y_scale = 40, x_scale = 50, y_time_scale = 25, y_author_scale = 5; 
+var y_scale = 40, x_scale = 50, y_time_scale = 12, y_author_scale = 4.5; 
 
 var cit_thresh = 10;
 
 var nodeOp = 1, linkOp = 0.5;
 
-var node_size_bool = 1, time_bool = 1, author_bool = 0, all_bool = 0;
+var node_size_bool = 1, time_bool = 1, author_bool = 0, all_bool = 0, colour = 1;
 
 d3.select("body").append("div")
    .attr("class","modal")
@@ -282,6 +286,30 @@ allNod.append("input").attr("type","checkbox").attr("id","all_button")
             updateGraph();
      });
 
+
+var forCol = d3.select("#controls")
+    .append("div")
+forCol.append("label")
+    .attr("class","labels")
+    .attr("style","width:250px;position:absolute;right:100px;top:450px")
+    .text("Select to determine Colour:");
+forCol.append("label").text("Conference Type").attr("class","labels")
+        .attr("style","width:170px;position:absolute;right:200px;top:470px")
+    .append("input").attr("type","radio").attr("name","for_col")
+    .property("checked", true)
+    .on("change",function(){
+            colour = 1;
+            updateGraph();
+     });
+forCol.append("label").text("Paper Type").attr("class","labels")
+    .attr("style","width:150px;position:absolute;right:20px;top:470px")
+    .append("input").attr("type","radio")
+    .attr("name","for_col")
+    .on("change",function(){
+            colour = 0;
+            updateGraph();
+     });
+
 //Generate nodes and links:
 updateGraph();
 function updateGraph(){
@@ -336,31 +364,74 @@ function updateGraph(){
 
 var node_size = legend.append("div").append("svg")
     .attr("style","width:400px; height:300px;position:absolute;right:0px;top:520px")
-for (var i = 2; i <9; i++){
- n = 15; c = "orangered"
- if(i==1){ n = 2; t = "Node Size for "+n+" Citations:", dx = 110}
- if(i==2){ n = 5; t = "Node Size for "+n+" Citations:", dx = 110}
- if(i==3){ n = 10; t = "Node Size for "+n+" Citations:", dx = 100}
- if(i==4){ n = 20; t = "Node Size for "+n+" Citations:", dx = 100}
- if(i==5){ c = "darkturquoise"; t = "Publications from InfoVis:", dx = 109}
- if(i==6){ c = "forestgreen"; t = "Publications from SciVis:", dx = 118}
- if(i==7){ c = "gold"; t = "Publications from VAST:", dx = 122}
- if(i==8){ c = "orangered"; t = "All Other Publications:", dx = 134}
- 
- node_size.append("text")
-    .attr("class","labels")
-    .attr("dx",dx)
-    .attr("dy",i*30-30)
-    .text(t);
- node_size.append("circle")
-   .attr("cx", 330)
-   .attr("cy", i*30-35)
-   .attr("r", n)
-   .attr("fill", c)
-   .attr("fill-opacity", nodeOp)
-   .attr("stroke","white")
-   .attr("stroke-width",0.5);
+if(colour==1){
+	for (var i = 2; i <9; i++){
+	 n = 15; 
+	 c = "orangered";
+	 if(i==1){ n = 2; t = "Node Size for "+n+" Citations:", dx = 110}
+	 if(i==2){ n = 5; t = "Node Size for "+n+" Citations:", dx = 110}
+	 if(i==3){ n = 10; t = "Node Size for "+n+" Citations:", dx = 100}
+	 if(i==4){ n = 20; t = "Node Size for "+n+" Citations:", dx = 100}
+	 if(i==5){ c = "darkturquoise"; t = "Publications from InfoVis:", dx = 109}
+	 if(i==6){ c = "forestgreen"; t = "Publications from SciVis:", dx = 118}
+	 if(i==7){ c = "gold"; t = "Publications from VAST:", dx = 122}
+	 if(i==8){ c = "orangered"; t = "All Other Publications:", dx = 134}
+	 
+	 node_size.append("text")
+	    .attr("class","labels")
+	    .attr("dx",dx)
+	    .attr("dy",i*30-30)
+	    .text(t);
+	 node_size.append("circle")
+	   .attr("cx", 330)
+	   .attr("cy", i*30-35)
+	   .attr("r", n)
+	   .attr("fill", c)
+	   .attr("fill-opacity", nodeOp)
+	   .attr("stroke","white")
+	   .attr("stroke-width",0.5);
+	}
+}else{
+	for (var i = 2; i <8; i++){
+	 n = 15; 
+	 c = "darkmagenta";
+	 if(i==1){ n = 2; t = "Node Size for "+n+" Citations:", dx = 110}
+	 if(i==2){ n = 5; t = "Node Size for "+n+" Citations:", dx = 110}
+	 if(i==3){ n = 10; t = "Node Size for "+n+" Citations:", dx = 100}
+	 if(i==4){ n = 20; t = "Node Size for "+n+" Citations:", dx = 100}
+	 if(i==5){ c = "midnightblue"; t = "Paper presented at Conferences:", dx = 56}
+	 if(i==6){ c = "darkmagenta"; t = "Paper published in Journals:", dx = 92}
+	 if(i==7){ c = "darkgreen"; t = "Other Publications:", dx = 158}
+	 
+	 node_size.append("text")
+	    .attr("class","labels")
+	    .attr("dx",dx)
+	    .attr("dy",i*30-30)
+	    .text(t);
+	 node_size.append("circle")
+	   .attr("cx", 330)
+	   .attr("cy", i*30-35)
+	   .attr("r", n)
+	   .attr("fill", c)
+	   .attr("fill-opacity", nodeOp)
+	   .attr("stroke","white")
+	   .attr("stroke-width",0.5);
+	}
 }
+ var a = legend.append("div")
+    .attr("style","width:220px;position:absolute;right:0px;top:880px")
+a.append("a")
+       .attr("class","labels")
+       .attr("href","https://sanjanaw.github.io/MS/Final/data_format.json")
+       .html("Link to JSON Data<br>");
+ a.append("a")
+       .attr("href","https://docs.google.com/spreadsheets/d/1xgoOPu28dQSSGPIp_HHQs0uvvcyLNdkMF9XtRajhhxU")
+       .attr("class","labels")
+       .html("Link to Raw Data File<br>");
+ a.append("a")
+       .attr("href","https://sanjanaw.github.io/MS/Final/Cal_Importance.py")
+       .attr("class","labels")
+       .html("Link to Processing Code<br>");
  var links = graph.selectAll("link")
    .data(data.links)
    .enter()
@@ -417,7 +488,8 @@ for (var i = 2; i <9; i++){
      return (d.size)*node_size_bool + (node_size_bool-1)*(-5)
    })
    .attr("fill", function(d, i) {
-     return d.color
+     if(colour == 1) return d.color;
+     else return d.paper_type;
    })
    .attr("fill-opacity", nodeOp)
    .attr("stroke","white")
@@ -432,15 +504,15 @@ for (var i = 2; i <9; i++){
       hover.style("opacity",0);
    })
    .on("click", function(d){
-      d3.select("#modal-content2").append("div").attr("id","modal-heading2")
-      .append("text").attr("class","labels").html("<text style='font-size:20px'><center>"+d.title+"</center></style><br>")
-      .append("text").attr("class","sub-heading").html("<br><br>Keywords from the paper:")
-      .append("text").attr("class","sub-heading").html("<br>"+d.keywords)
-      .append("text").attr("class","sub-heading").html("<br><br>Abstract of the paper:")
-      .append("text").attr("class","sub-heading").html("<br>"+d.abstract)
-      .append("text").attr("class","sub-heading").html("<br><br>Authors of the paper:")
-      .append("text").attr("class","sub-heading").html("<br>"+d.authors)
-      .append("text").attr("class","sub-heading").html("<br><br><a href="+d.link+">Link to the paper</a>");
+     var content =  d3.select("#modal-content2").append("div").attr("id","modal-heading2")
+      .append("text").attr("class","labels").html("<br><text style='font-size:30px;text-transform: capitalize;font-weight:bold'><center>"+d.title+"</center></style><br>");
+     if(d.keywords!="") content.append("text").html("<br><br><text style='font-size:18px;font-weight:bold'>Keywords from the Paper:</style>")
+      .append("text").html("<br>"+d.keywords);
+    content.append("text").html("<br><br><text style='font-size:18px;font-weight:bold'>Abstract of the Paper:</style>")
+      .append("text").html("<br>"+d.abstract)
+      .append("text").html("<br><br><text style='font-size:18px;font-weight:bold'>Authors of the Paper:</style>")
+      .append("text").html("<br>"+d.authors)
+      .append("text").html("<br><br><text style='font-size:18px;font-weight:bold;'><a href="+d.link+">Link to the Paper</a></style>");
       document.getElementById("modal2").style.display = "block"; 
    });
 }//End of update graph
@@ -460,7 +532,7 @@ for (var i = 2; i <9; i++){
       var color = d3.scale.category20();
       year = this.value;
       d3.select(".modal-content").append("div").attr("id","modal-heading")
-      .append("text").attr("class","labels").html("<text style='font-size:20px'><center>For the year "+year+"</center></style>");
+      .append("text").attr("class","labels").html("<br><text style='font-size:30px;text-transform: capitalize;font-weight:bold'><center>For the year "+year+"</center></style>");
       document.getElementById("modal").style.display = "block"; 
       words = data[year].map(function(word){
         return {
