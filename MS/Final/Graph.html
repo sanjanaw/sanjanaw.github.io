@@ -460,10 +460,11 @@ a.append("a")
         .attr("orient", "auto")
         .append("path")
         .attr("d", "M 0,0 m -5,-5 L 5,0 L -5,5 Z")
-        .attr("fill", "none")
+        .attr("fill", "dimgrey")
         .attr("stroke", "dimgrey")
         .attr("stroke-opacity",linkOp)
-        .attr("stroke-width","1px")
+        .attr("fill-opacity",linkOp)
+        .attr("stroke-width","0.5px")
        return "url(#arrow"+l.target+")";
      })
      return targetNode.x * x_scale;
@@ -477,6 +478,7 @@ a.append("a")
    .data(data.nodes)
    .enter()
    .append("circle")
+   .attr("id",function(d){ return "node"+d.name; })
    .filter(function(d){return d.size>cit_thresh;})
    .attr("cx", function(d) {
      return d.x*x_scale
@@ -494,14 +496,58 @@ a.append("a")
    .attr("fill-opacity", nodeOp)
    .attr("stroke","white")
    .attr("stroke-width",0.5)
-   .on("mouseover",function(d){
+   .on("mouseover",function(d,i){
       hover.style("opacity",1)
          .style("left", (d3.event.pageX+20) + "px")		
          .style("top", (d3.event.pageY) + "px")	
          .html(d.title);
+      nodes.style("fill-opacity",nodeOp*0.1);
+      nodes.style("stroke-opacity",nodeOp*0.1);
+      links.style('stroke-width', function(l) {
+	if (d.name == l.sourceName || d.name == l.targetName){
+                d3.selectAll("#node"+d.name+", #node"+l.sourceName+", #node"+l.targetName).style("fill-opacity",nodeOp);
+                d3.selectAll("#node"+d.name+", #node"+l.sourceName+", #node"+l.targetName).style("stroke-opacity",nodeOp);
+                d3.selectAll("#node"+l.sourceName).transition().attr("r",function(){
+                   return 1.1*((l.sourceSize)*node_size_bool + (node_size_bool-1)*(-5))
+                });
+                d3.selectAll("#node"+l.targetName).transition().attr("r",function(){
+                   return 1.1*((l.targetSize)*node_size_bool + (node_size_bool-1)*(-5))
+                });
+                d3.selectAll("#node"+d.name).transition().attr("r",function(){
+                   return 1.5*((d.size)*node_size_bool + (node_size_bool-1)*(-5))
+                });
+		graph.selectAll("#arrow"+l.target).attr("refX", l.targetSize*node_size_bool);
+	      	return 2;
+	}
+	else
+	      	return 0.5;
+	}
+       );
+       d3.selectAll("path").style("fill-opacity",linkOp*0.1);
+       links.style('stroke-opacity', function(l) {
+	if (d.name == l.sourceName || d.name == l.targetName){
+                graph.selectAll("#arrow"+l.target).attr("fill", "dimgrey").style("fill-opacity",linkOp);
+		return linkOp;
+        }
+	else
+		return linkOp*0.1;
+	}
+       );
    })
    .on("mouseout",function(d){
       hover.style("opacity",0);
+      nodes.attr("r", function(d){
+         return (d.size)*node_size_bool + (node_size_bool-1)*(-5)
+       })
+      nodes.style("fill-opacity", nodeOp)
+      nodes.style("stroke-opacity",nodeOp);
+      d3.selectAll("path").style("fill-opacity",linkOp);
+      links.style('stroke-width', function(l) {
+              graph.selectAll("#arrow"+l.source).attr("refX", l.sourceSize*2*node_size_bool+10);
+              graph.selectAll("#arrow"+l.target).attr("refX", l.targetSize*2*node_size_bool+10);
+	    return 0.5;
+	    });
+      links.style('stroke-opacity', linkOp);
    })
    .on("click", function(d){
      var content =  d3.select("#modal-content2").append("div").attr("id","modal-heading2")
