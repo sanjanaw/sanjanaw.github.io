@@ -351,14 +351,16 @@ function updateGraph(){
         .attr("orient", "auto")
         .append("path")
         .attr("d", "M 0,0 m -5,-5 L 5,0 L -5,5 Z")
-        .attr("fill", "none")
+        .attr("fill", "dimgrey")
         .attr("stroke", "dimgrey")
+        .attr("fill-opacity",linkOp)
         .attr("stroke-opacity",linkOp)
         .attr("stroke-width","1px")
        return "url(#arrow)";
      })
-   .attr("fill", "none")
+   .attr("fill", "dimgrey")
    .attr("stroke", "dimgrey")
+   .attr("fill-opacity",linkOp)
    .attr("stroke-opacity",linkOp)
    .attr("stroke-width","0.5px");
 
