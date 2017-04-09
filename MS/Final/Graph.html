@@ -496,6 +496,7 @@ a.append("a")
    .attr("fill-opacity", nodeOp)
    .attr("stroke","white")
    .attr("stroke-width",0.5)
+   .attr("stroke-opacity", nodeOp)
    .on("mouseover",function(d,i){
       hover.style("opacity",1)
          .style("left", (d3.event.pageX+20) + "px")		
