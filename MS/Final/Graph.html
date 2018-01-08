@@ -278,6 +278,7 @@ allNod.append("label")
 allNod.append("input").attr("type","checkbox").attr("id","all_button")
     .attr("style","width:10px;position:absolute;right:140px;top:140px")
     .on("input",function(){ 
+		console.log("ALL BUTTON CLICKED.");
             if(all_bool ==1) { all_bool = 0; }
             else if(all_bool==0) { all_bool = 1; author_bool = 0; time_bool = 0; node_size_bool = 0;  
                                 d3.select("#node_size_button").property("checked",false);
