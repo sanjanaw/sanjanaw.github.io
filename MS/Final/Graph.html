@@ -219,7 +219,7 @@ nodSiz.append("label")
 nodSiz.append("input").attr("type","checkbox").attr("id","node_size_button")
     .attr("style","width:10px;position:absolute;right:140px;top:80px")
     .property("checked", true)
-    .on("input",function(){ 
+    .on("change",function(){ 
             if(node_size_bool == 1) node_size_bool = 0;
             else if(node_size_bool == 0) node_size_bool = 1;
             updateGraph();            
@@ -242,7 +242,7 @@ time.append("label")
 time.append("input").attr("type","checkbox").attr("id","time_button")
     .attr("style","width:10px;position:absolute;right:140px;top:100px")
     .property("checked", true)
-    .on("input",function(){
+    .on("change",function(){
         if(time_bool==1){ time_bool = 0; node_size_bool = 0; d3.select("#node_size_button").property("checked",false);}
         else if(time_bool == 0){ time_bool = 1; all_bool = 0;  d3.select("#all_button").property("checked",false);}
         updateGraph();
@@ -264,7 +264,7 @@ author.append("label")
     });
 author.append("input").attr("type","checkbox").attr("id","author_button")
     .attr("style","width:10px;position:absolute;right:140px;top:120px")
-    .on("input",function(){ 
+    .on("change",function(){ 
             if(author_bool == 1) author_bool = 0;
             else if(author_bool==0) { author_bool =1; all_bool = 0;  d3.select("#all_button").property("checked",false);}
             updateGraph();
@@ -278,7 +278,6 @@ allNod.append("label")
 allNod.append("input").attr("type","checkbox").attr("id","all_button")
     .attr("style","width:10px;position:absolute;right:140px;top:140px")
     .on("change",function(){ 
-		console.log("ALL BUTTON CLICKED.");
             if(all_bool ==1) { all_bool = 0; }
             else if(all_bool==0) { all_bool = 1; author_bool = 0; time_bool = 0; node_size_bool = 0;  
                                 d3.select("#node_size_button").property("checked",false);
